@@ -16,6 +16,11 @@ export type AuthState =
 export interface UserSession {
   userId: number;
   email: string;
+  name: string;
+}
+
+export interface JWTPayload extends UserSession {
+  [key: string]: unknown;
 }
 
 export interface SignUpData {

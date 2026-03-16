@@ -2,6 +2,8 @@ import bcrypt from 'bcryptjs';
 import { SignJWT, jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
 
+import { JWTPayload } from '../types';
+
 const SECRET_KEY = new TextEncoder().encode(process.env.JWT_SECRET);
 
 export async function hashPassword(password: string): Promise<string> {
@@ -15,11 +17,7 @@ export async function comparePassword(
   return await bcrypt.compare(password, hash);
 }
 
-export async function signToken(payload: {
-  userId: number;
-  email: string;
-  name: string;
-}) {
+export async function signToken(payload: JWTPayload) {
   return await new SignJWT(payload)
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
@@ -30,7 +28,7 @@ export async function signToken(payload: {
 export async function verifyToken(token: string) {
   try {
     const { payload } = await jwtVerify(token, SECRET_KEY);
-    return payload as { userId: number; email: string; name: string };
+    return payload as unknown as JWTPayload;
   } catch {
     return null;
   }

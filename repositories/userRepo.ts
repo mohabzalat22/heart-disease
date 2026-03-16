@@ -19,4 +19,11 @@ export class UserRepo {
       data,
     });
   }
+
+  static async updateUser(id: number, data: Prisma.UserUpdateInput) {
+    return prisma.user.update({
+      where: { id },
+      data,
+    });
+  }
 }

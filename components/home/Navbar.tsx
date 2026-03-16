@@ -52,7 +52,9 @@ export default async function Navbar() {
 
         <div className="flex items-center gap-3">
           {user ? (
-            <UserButton user={{ name: user.name, email: user.email }} />
+            <UserButton
+              user={{ name: user.name, email: user.email, image: user.image }}
+            />
           ) : (
             <>
               <Button

@@ -1,5 +1,5 @@
 generator client {
-  provider = "prisma-client"
+  provider = "prisma-client-js"
   output   = "../generated/prisma"
 }
 
@@ -12,6 +12,7 @@ model User {
   password String
   name     String
   email    String @unique
+  image    String?
 
   /**
    * relations
