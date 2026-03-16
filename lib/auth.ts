@@ -15,7 +15,11 @@ export async function comparePassword(
   return await bcrypt.compare(password, hash);
 }
 
-export async function signToken(payload: { userId: number; email: string }) {
+export async function signToken(payload: {
+  userId: number;
+  email: string;
+  name: string;
+}) {
   return await new SignJWT(payload)
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
@@ -26,7 +30,7 @@ export async function signToken(payload: { userId: number; email: string }) {
 export async function verifyToken(token: string) {
   try {
     const { payload } = await jwtVerify(token, SECRET_KEY);
-    return payload as { userId: number; email: string };
+    return payload as { userId: number; email: string; name: string };
   } catch {
     return null;
   }

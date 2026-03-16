@@ -16,7 +16,11 @@ export class AuthService {
       password: hashedPassword,
     });
 
-    const token = await signToken({ userId: user.id, email: user.email });
+    const token = await signToken({
+      userId: user.id,
+      email: user.email,
+      name: user.name,
+    });
     return { user, token };
   }
 
@@ -31,7 +35,11 @@ export class AuthService {
       throw new Error('Invalid credentials');
     }
 
-    const token = await signToken({ userId: user.id, email: user.email });
+    const token = await signToken({
+      userId: user.id,
+      email: user.email,
+      name: user.name,
+    });
     return { user, token };
   }
 }
