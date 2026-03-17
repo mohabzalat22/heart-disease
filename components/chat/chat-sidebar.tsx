@@ -10,6 +10,7 @@ import {
   User,
   LogOut,
 } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 import {
   Sidebar,
   SidebarContent,
@@ -38,6 +39,7 @@ import { handleSignOut } from '@/actions/authActions';
 import { Chat } from '@/generated/prisma';
 import { createNewChat } from '@/actions/chatActions';
 import { ChatActions } from './chat-actions';
+import { cn } from '@/lib/utils';
 
 interface ChatSidebarProps {
   user: {
@@ -50,6 +52,9 @@ interface ChatSidebarProps {
 
 export function ChatSidebar({ user, chats }: ChatSidebarProps) {
   // ... initials logic ...
+  const pathname = usePathname();
+  const currentChatToken = pathname.split('/').pop();
+
   const initials = user.name
     ? user.name
         .split(' ')
@@ -87,9 +92,29 @@ export function ChatSidebar({ user, chats }: ChatSidebarProps) {
                         href={`/chat/${chat.token}`}
                         className="flex-1 min-w-0"
                       >
-                        <SidebarMenuButton className="px-4 py-6 hover:bg-sidebar-accent transition-colors duration-200 w-full">
-                          <MessageSquare className="h-4 w-4 text-muted-foreground flex-shrink-0 mr-2" />
-                          <span className="truncate">
+                        <SidebarMenuButton
+                          isActive={currentChatToken === chat.token}
+                          className={cn(
+                            'px-4 py-6 hover:bg-sidebar-accent transition-all duration-200 w-full',
+                            currentChatToken === chat.token &&
+                              'bg-sidebar-accent shadow-sm ring-1 ring-border/50'
+                          )}
+                        >
+                          <MessageSquare
+                            className={cn(
+                              'h-4 w-4 flex-shrink-0 mr-2',
+                              currentChatToken === chat.token
+                                ? 'text-primary'
+                                : 'text-muted-foreground'
+                            )}
+                          />
+                          <span
+                            className={cn(
+                              'truncate',
+                              currentChatToken === chat.token &&
+                                'font-semibold text-primary'
+                            )}
+                          >
                             {chat.title || 'New Assessment'}
                           </span>
                         </SidebarMenuButton>
