@@ -113,7 +113,7 @@ export function ChatContainer({
             {messages.map((msg, i) => (
               <div
                 key={i}
-                className={`flex gap-4 group animate-in slide-in-from-bottom-2 duration-500 fade-in fill-mode-both`}
+                className={`flex gap-4 group animate-in slide-in-from-bottom-2 duration-500 fade-in fill-mode-both ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}
                 style={{ animationDelay: `${i * 10}ms` }}
               >
                 <Avatar
@@ -134,13 +134,19 @@ export function ChatContainer({
                     )}
                   </AvatarFallback>
                 </Avatar>
-                <div className="flex-1 space-y-2">
-                  <div className="flex items-center gap-2">
+                <div
+                  className={`flex-1 space-y-2 ${msg.role === 'user' ? 'flex flex-col items-end' : ''}`}
+                >
+                  <div
+                    className={`flex items-center gap-2 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}
+                  >
                     <p className="text-sm font-semibold tracking-tight text-foreground/90">
                       {msg.role === 'assistant' ? 'CardioAI' : 'You'}
                     </p>
                   </div>
-                  <div className="text-sm leading-relaxed text-muted-foreground prose prose-neutral dark:prose-invert max-w-none">
+                  <div
+                    className={`text-sm leading-relaxed ${msg.role === 'user' ? 'text-right bg-primary/10 p-3 rounded-2xl rounded-tr-none text-foreground' : 'text-muted-foreground'} prose prose-neutral dark:prose-invert max-w-none`}
+                  >
                     {msg.content}
                   </div>
                 </div>
