@@ -18,6 +18,8 @@ export const metadata: Metadata = {
     'Get an AI-powered heart disease risk assessment in minutes. Understand your cardiovascular risk and take action today.',
 };
 
+import { Toaster } from 'sonner';
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -29,6 +31,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         {children}
+        <Toaster position="top-center" richColors />
       </body>
     </html>
   );

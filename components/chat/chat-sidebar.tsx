@@ -37,6 +37,7 @@ import Link from 'next/link';
 import { handleSignOut } from '@/actions/authActions';
 import { Chat } from '@/generated/prisma';
 import { createNewChat } from '@/actions/chatActions';
+import { ChatActions } from './chat-actions';
 
 interface ChatSidebarProps {
   user: {
@@ -81,14 +82,25 @@ export function ChatSidebar({ user, chats }: ChatSidebarProps) {
               {chats.length > 0 ? (
                 chats.map((chat: Chat) => (
                   <SidebarMenuItem key={chat.id}>
-                    <Link href={`/chat/${chat.token}`} className="w-full">
-                      <SidebarMenuButton className="px-4 py-6 hover:bg-sidebar-accent transition-colors duration-200">
-                        <MessageSquare className="h-4 w-4 text-muted-foreground" />
-                        <span className="truncate">
-                          {chat.title || 'New Assessment'}
-                        </span>
-                      </SidebarMenuButton>
-                    </Link>
+                    <div className="flex items-center w-full group/chatitem">
+                      <Link
+                        href={`/chat/${chat.token}`}
+                        className="flex-1 min-w-0"
+                      >
+                        <SidebarMenuButton className="px-4 py-6 hover:bg-sidebar-accent transition-colors duration-200 w-full">
+                          <MessageSquare className="h-4 w-4 text-muted-foreground flex-shrink-0 mr-2" />
+                          <span className="truncate">
+                            {chat.title || 'New Assessment'}
+                          </span>
+                        </SidebarMenuButton>
+                      </Link>
+                      <div className="pr-2 opacity-0 group-hover/chatitem:opacity-100 transition-opacity flex-shrink-0">
+                        <ChatActions
+                          token={chat.token}
+                          initialTitle={chat.title || 'New Assessment'}
+                        />
+                      </div>
+                    </div>
                   </SidebarMenuItem>
                 ))
               ) : (
