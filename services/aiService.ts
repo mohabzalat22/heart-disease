@@ -2,6 +2,7 @@ import { type Message } from '@/types/message';
 import { MessageService } from './messageService';
 import { Actor } from '@/generated/prisma';
 import { prisma } from '@/lib/prisma';
+import { logger } from '@/lib/logger';
 
 export const AIService = {
   /**
@@ -87,7 +88,7 @@ export const AIService = {
           // Close the stream
           controller.close();
         } catch (error) {
-          console.error('Ollama streaming error:', error);
+          logger.error(error, 'Ollama streaming error');
           controller.error(error);
         }
       },
