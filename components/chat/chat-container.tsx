@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Bot, User as UserIcon } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useRouter } from 'next/navigation';
+import { Markdown } from '@/components/chat/markdown';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -147,7 +148,7 @@ export function ChatContainer({
                   <div
                     className={`text-sm leading-relaxed ${msg.role === 'user' ? 'text-right bg-primary/10 p-3 rounded-2xl rounded-tr-none text-foreground' : 'text-muted-foreground'} prose prose-neutral dark:prose-invert max-w-none`}
                   >
-                    {msg.content}
+                    <Markdown content={msg.content} />
                   </div>
                 </div>
               </div>
