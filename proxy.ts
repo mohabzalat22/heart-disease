@@ -1,4 +1,4 @@
-import type { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { logger } from '@/lib/logger';
 
 export function proxy(request: NextRequest) {
@@ -8,4 +8,5 @@ export function proxy(request: NextRequest) {
   });
 
   logger.info('Incoming request', meta);
+  return NextResponse.next();
 }
