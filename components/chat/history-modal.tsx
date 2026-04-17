@@ -8,11 +8,14 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { MessageSquare, Calendar, Loader2 } from 'lucide-react';
+import { MessageSquare, Calendar, Loader2, Search, X } from 'lucide-react';
 import { getUserChats } from '@/actions/chatActions';
 import { Chat } from '@/generated/prisma';
 import Link from 'next/link';
 import { ChatActions } from './chat-actions';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { useHistory } from '@/hooks/use-history';
 
 interface HistoryModalProps {
   open: boolean;
@@ -27,6 +30,8 @@ type ChatGroup = {
 export function HistoryModal({ open, onOpenChange }: HistoryModalProps) {
   const [chats, setChats] = React.useState<Chat[]>([]);
   const [isLoading, setIsLoading] = React.useState(false);
+  const { searchQuery, setSearchQuery } = useHistory();
+  const searchInputRef = React.useRef<HTMLInputElement>(null);
 
   const fetchChats = React.useCallback(async () => {
     setIsLoading(true);
@@ -43,6 +48,10 @@ export function HistoryModal({ open, onOpenChange }: HistoryModalProps) {
   React.useEffect(() => {
     if (open) {
       fetchChats();
+      // Auto-focus search input when modal opens
+      setTimeout(() => {
+        searchInputRef.current?.focus();
+      }, 100);
     }
   }, [open, fetchChats]);
 
@@ -79,7 +88,13 @@ export function HistoryModal({ open, onOpenChange }: HistoryModalProps) {
       .map(([label, chats]) => ({ label, chats }));
   };
 
-  const groupedChats = groupChats(chats);
+  const filteredChats = chats.filter((chat) =>
+    (chat.title || 'New Assessment')
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase())
+  );
+
+  const groupedChats = groupChats(filteredChats);
 
   const formatDate = (date: Date) => {
     return new Intl.DateTimeFormat('en-US', {
@@ -92,11 +107,33 @@ export function HistoryModal({ open, onOpenChange }: HistoryModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="min-w-4xl p-0 overflow-hidden border-border/50 bg-background/95 backdrop-blur-xl gap-0">
-        <DialogHeader className="p-6 pb-4 border-b border-border/10">
-          <DialogTitle className="flex items-center gap-2 text-xl font-bold bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent">
-            Assessment History
-          </DialogTitle>
+      <DialogContent className="sm:max-w-xl md:max-w-2xl lg:max-w-4xl p-0 overflow-hidden border-border/50 bg-background/95 backdrop-blur-xl gap-0">
+        <DialogHeader className="p-6 pb-6 border-b border-border/10">
+          <div className="flex flex-col gap-4">
+            <DialogTitle className="flex items-center gap-2 text-xl font-bold bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent">
+              Assessment History
+            </DialogTitle>
+            <div className="relative">
+              <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/70" />
+              <Input
+                ref={searchInputRef}
+                placeholder="Search by title..."
+                className="pl-10 pr-10 h-11 bg-accent/20 border-border/10 focus-visible:ring-primary/20 transition-all duration-300 rounded-xl"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              {searchQuery && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-1 top-1/2 h-8 w-8 -translate-y-1/2 hover:bg-transparent text-muted-foreground hover:text-foreground transition-colors"
+                  onClick={() => setSearchQuery('')}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+          </div>
         </DialogHeader>
         
         <ScrollArea className="h-[60vh] p-6">
@@ -105,7 +142,7 @@ export function HistoryModal({ open, onOpenChange }: HistoryModalProps) {
               <Loader2 className="h-8 w-8 text-primary animate-spin" />
               <p className="text-sm text-muted-foreground animate-pulse">Retrieving your assessment history...</p>
             </div>
-          ) : chats.length > 0 ? (
+          ) : filteredChats.length > 0 ? (
             <div className="space-y-8">
               {groupedChats.map((group) => (
                 <div key={group.label} className="space-y-4">
@@ -146,13 +183,32 @@ export function HistoryModal({ open, onOpenChange }: HistoryModalProps) {
               ))}
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center py-20 text-center gap-4">
-              <div className="p-4 rounded-full bg-muted/50 border border-border/50">
-                <MessageSquare className="h-8 w-8 text-muted-foreground/50" />
+            <div className="flex flex-col items-center justify-center py-24 text-center gap-5">
+              <div className="p-5 rounded-3xl bg-muted/30 border border-border/50 shadow-inner">
+                {searchQuery ? (
+                   <Search className="h-9 w-9 text-muted-foreground/30" />
+                ) : (
+                   <MessageSquare className="h-9 w-9 text-muted-foreground/30" />
+                )}
               </div>
-              <div className="space-y-1">
-                <p className="text-lg font-medium">No assessments found</p>
-                <p className="text-sm text-muted-foreground">Start a new assessment to see your history here.</p>
+              <div className="space-y-2 max-w-[280px]">
+                <p className="text-xl font-bold tracking-tight">
+                  {searchQuery ? 'No results found' : 'No assessments found'}
+                </p>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {searchQuery 
+                    ? `We couldn't find any assessments matching "${searchQuery}".`
+                    : 'Your assessment history will appear here once you start your first conversation.'}
+                </p>
+                {searchQuery && (
+                  <Button 
+                    variant="link" 
+                    className="text-primary font-semibold hover:no-underline px-0 h-auto mt-2"
+                    onClick={() => setSearchQuery('')}
+                  >
+                    Clear search query
+                  </Button>
+                )}
               </div>
             </div>
           )}

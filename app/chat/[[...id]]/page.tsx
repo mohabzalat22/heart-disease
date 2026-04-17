@@ -8,6 +8,8 @@ import { redirect } from 'next/navigation';
 import { ChatContainer } from '@/components/chat/chat-container';
 import { Actor } from '@/generated/prisma';
 
+import { HistoryProvider } from '@/hooks/use-history';
+
 export default async function ChatPage({
   params,
 }: {
@@ -75,15 +77,17 @@ export default async function ChatPage({
 
   return (
     <SidebarProvider>
-      <ChatSidebar
-        user={{ name: user.name, email: user.email, image: user.image }}
-        chats={chats}
-      />
-      <ChatContainer
-        user={{ name: user.name, email: user.email, image: user.image }}
-        initialMessages={initialMessages}
-        chatId={chatId || 0} // Fix this if chatId can be 0 or null
-      />
+      <HistoryProvider>
+        <ChatSidebar
+          user={{ name: user.name, email: user.email, image: user.image }}
+          chats={chats}
+        />
+        <ChatContainer
+          user={{ name: user.name, email: user.email, image: user.image }}
+          initialMessages={initialMessages}
+          chatId={chatId || 0}
+        />
+      </HistoryProvider>
     </SidebarProvider>
   );
 }
