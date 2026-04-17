@@ -40,6 +40,7 @@ import { Chat } from '@/generated/prisma';
 import { createNewChat } from '@/actions/chatActions';
 import { ChatActions } from './chat-actions';
 import { cn } from '@/lib/utils';
+import { HistoryModal } from './history-modal';
 
 interface ChatSidebarProps {
   user: {
@@ -51,6 +52,7 @@ interface ChatSidebarProps {
 }
 
 export function ChatSidebar({ user, chats }: ChatSidebarProps) {
+  const [isHistoryModalOpen, setIsHistoryModalOpen] = React.useState(false);
   // ... initials logic ...
   const pathname = usePathname();
   const currentChatToken = pathname.split('/').pop();
@@ -144,7 +146,10 @@ export function ChatSidebar({ user, chats }: ChatSidebarProps) {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton className="px-4 py-6 hover:bg-sidebar-accent transition-colors duration-200">
+                <SidebarMenuButton
+                  className="px-4 py-6 hover:bg-sidebar-accent transition-colors duration-200"
+                  onClick={() => setIsHistoryModalOpen(true)}
+                >
                   <History className="h-4 w-4 text-muted-foreground" />
                   <span>View full history</span>
                 </SidebarMenuButton>
@@ -152,6 +157,11 @@ export function ChatSidebar({ user, chats }: ChatSidebarProps) {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        <HistoryModal
+          open={isHistoryModalOpen}
+          onOpenChange={setIsHistoryModalOpen}
+        />
       </SidebarContent>
       <SidebarFooter className="p-4 border-t border-border/50">
         <SidebarMenu>

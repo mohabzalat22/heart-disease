@@ -67,3 +67,16 @@ export async function deleteChat(token: string) {
   revalidatePath('/chat');
   return { success: true };
 }
+
+export async function getUserChats() {
+  const cookieStore = await cookies();
+  const authToken = cookieStore.get('auth_token')?.value;
+  const verifiedUser = authToken ? await verifyToken(authToken) : null;
+
+  if (!verifiedUser) {
+    throw new Error('Unauthorized');
+  }
+
+  const chats = await ChatService.getAll(verifiedUser.userId);
+  return chats;
+}
