@@ -19,12 +19,16 @@ interface ChatContainerProps {
   user: { name: string; email: string; image: string | null };
   initialMessages: Message[];
   chatId: number;
+  token: string;
+  isShared: boolean;
 }
 
 export function ChatContainer({
   user,
   initialMessages,
   chatId,
+  token,
+  isShared,
 }: ChatContainerProps) {
   const [messages, setMessages] = React.useState<Message[]>(initialMessages);
   const [isLoading, setIsLoading] = React.useState(false);
@@ -106,7 +110,12 @@ export function ChatContainer({
 
   return (
     <SidebarInset className="flex flex-col h-screen overflow-hidden bg-background/50">
-      <ChatHeader user={user} />
+      <ChatHeader 
+        user={user} 
+        chatId={chatId}
+        token={token}
+        isShared={isShared}
+      />
 
       <main className="flex-1 overflow-hidden relative">
         <ScrollArea className="h-full px-4 lg:px-0" ref={scrollRef}>

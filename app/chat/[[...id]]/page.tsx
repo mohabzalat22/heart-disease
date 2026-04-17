@@ -86,6 +86,8 @@ export default async function ChatPage({
           user={{ name: user.name, email: user.email, image: user.image }}
           initialMessages={initialMessages}
           chatId={chatId || 0}
+          token={chatRecord?.token || ''}
+          isShared={chatRecord?.isShared || false}
         />
       </HistoryProvider>
     </SidebarProvider>
