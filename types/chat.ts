@@ -3,6 +3,8 @@ export interface Chat {
   title: string | null;
   token: string;
   userId: number;
+  isShared: boolean;
+  sharedAt: Date | null;
   createdAt: Date;
 }
 

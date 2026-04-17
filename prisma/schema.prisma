@@ -26,6 +26,8 @@ model Chat {
   title     String?
   token     String    @unique
   userId    Int
+  isShared  Boolean   @default(false)
+  sharedAt  DateTime?
   createdAt DateTime  @default(now())
   /**
    * relations
