@@ -5,6 +5,8 @@ import { verifyToken } from '../lib/auth';
 import { UserRepo } from '../repositories/userRepo';
 import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
+import fs from 'fs';
+import path from 'path';
 
 async function checkAdmin() {
   const cookieStore = await cookies();
@@ -35,4 +37,73 @@ export async function getGlobalPrompt() {
     return '';
   }
   return await SystemRepo.getDefaultPrompt();
+}
+
+export async function getLogs(
+  page = 1,
+  pageSize = 50,
+  level?: string,
+  date?: string
+) {
+  const isAdmin = await checkAdmin();
+  if (!isAdmin) {
+    throw new Error('Unauthorized: Admin access required');
+  }
+
+  const logFile = path.join(process.cwd(), 'logs', 'app.log');
+
+  if (!fs.existsSync(logFile)) {
+    return { logs: [], total: 0, pages: 0 };
+  }
+
+  try {
+    const content = fs.readFileSync(logFile, 'utf-8');
+    const lines = content.trim().split('\n');
+
+    let parsedLogs = lines.map((line) => {
+      try {
+        return JSON.parse(line);
+      } catch {
+        return {
+          time: new Date().toISOString(),
+          level: 'error',
+          message: 'Failed to parse log line',
+          meta: line,
+        };
+      }
+    });
+
+    // Apply filtering
+    if (level && level !== 'all') {
+      parsedLogs = parsedLogs.filter(
+        (log) => log.level.toLowerCase() === level.toLowerCase()
+      );
+    }
+
+    if (date) {
+      const filterDate = new Date(date).toDateString();
+      parsedLogs = parsedLogs.filter(
+        (log) => new Date(log.time).toDateString() === filterDate
+      );
+    }
+
+    // Sort by time descending
+    parsedLogs.sort(
+      (a, b) => new Date(b.time).getTime() - new Date(a.time).getTime()
+    );
+
+    const total = parsedLogs.length;
+    const pages = Math.ceil(total / pageSize);
+    const offset = (page - 1) * pageSize;
+    const paginatedLogs = parsedLogs.slice(offset, offset + pageSize);
+
+    return {
+      logs: paginatedLogs,
+      total,
+      pages,
+    };
+  } catch (error) {
+    console.error('Error reading logs:', error);
+    return { logs: [], total: 0, pages: 0 };
+  }
 }

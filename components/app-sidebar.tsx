@@ -31,7 +31,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { handleSignOut } from '@/actions/authActions';
 
@@ -45,6 +45,8 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
 
 export function AppSidebar({ user, ...props }: AppSidebarProps) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const currentView = searchParams.get('view') || 'prompt';
 
   const initials = user.name
     ? user.name
@@ -54,6 +56,8 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
         .toUpperCase()
         .slice(0, 2)
     : user.email[0].toUpperCase();
+
+  const isAdminPath = pathname === '/admin';
 
   return (
     <Sidebar
@@ -87,20 +91,21 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
       <SidebarContent className="px-2">
         <SidebarMenu className="gap-1">
           <SidebarMenuItem>
-            <Link href="/admin" className="w-full">
+            <Link href="/admin?view=prompt" className="w-full">
               <SidebarMenuButton
-                isActive={pathname === '/admin'}
+                isActive={isAdminPath && currentView === 'prompt'}
                 tooltip="System Prompt"
                 className={cn(
                   'px-4 py-6 hover:bg-sidebar-accent transition-all duration-200 w-full justify-start',
-                  pathname === '/admin' &&
+                  isAdminPath &&
+                    currentView === 'prompt' &&
                     'bg-sidebar-accent shadow-sm ring-1 ring-border/50'
                 )}
               >
                 <FileText
                   className={cn(
                     'h-4 w-4 flex-shrink-0 mr-2',
-                    pathname === '/admin'
+                    isAdminPath && currentView === 'prompt'
                       ? 'text-primary'
                       : 'text-muted-foreground'
                   )}
@@ -108,12 +113,45 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
                 <span
                   className={cn(
                     'font-medium text-sm',
-                    pathname === '/admin'
+                    isAdminPath && currentView === 'prompt'
                       ? 'text-primary font-semibold'
                       : 'text-foreground/70'
                   )}
                 >
                   System Prompt
+                </span>
+              </SidebarMenuButton>
+            </Link>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <Link href="/admin?view=logs" className="w-full">
+              <SidebarMenuButton
+                isActive={isAdminPath && currentView === 'logs'}
+                tooltip="User Logs"
+                className={cn(
+                  'px-4 py-6 hover:bg-sidebar-accent transition-all duration-200 w-full justify-start',
+                  isAdminPath &&
+                    currentView === 'logs' &&
+                    'bg-sidebar-accent shadow-sm ring-1 ring-border/50'
+                )}
+              >
+                <ShieldCheck
+                  className={cn(
+                    'h-4 w-4 flex-shrink-0 mr-2',
+                    isAdminPath && currentView === 'logs'
+                      ? 'text-primary'
+                      : 'text-muted-foreground'
+                  )}
+                />
+                <span
+                  className={cn(
+                    'font-medium text-sm',
+                    isAdminPath && currentView === 'logs'
+                      ? 'text-primary font-semibold'
+                      : 'text-foreground/70'
+                  )}
+                >
+                  User Logs
                 </span>
               </SidebarMenuButton>
             </Link>
