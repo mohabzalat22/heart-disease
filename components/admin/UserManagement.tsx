@@ -1,34 +1,31 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { 
-  getAllUsers, 
-  toggleUserStatus 
-} from '@/actions/adminActions';
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
+import { getAllUsers, toggleUserStatus } from '@/actions/adminActions';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from '@/components/ui/table';
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardHeader, 
-  CardTitle 
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { 
-  Search, 
-  User as UserIcon, 
-  Shield, 
+import {
+  Search,
+  User as UserIcon,
+  Shield,
   Loader2,
-  AlertCircle
+  AlertCircle,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
@@ -69,8 +66,14 @@ export function UserManagement({ currentUserId }: { currentUserId?: number }) {
     try {
       setTogglingId(userId);
       await toggleUserStatus(userId, !currentStatus);
-      setUsers(prev => prev.map(u => u.id === userId ? { ...u, isActive: !currentStatus } : u));
-      toast.success(`User ${!currentStatus ? 'activated' : 'deactivated'} successfully.`);
+      setUsers((prev) =>
+        prev.map((u) =>
+          u.id === userId ? { ...u, isActive: !currentStatus } : u
+        )
+      );
+      toast.success(
+        `User ${!currentStatus ? 'activated' : 'deactivated'} successfully.`
+      );
     } catch {
       toast.error('Failed to update user status.');
     } finally {
@@ -78,9 +81,10 @@ export function UserManagement({ currentUserId }: { currentUserId?: number }) {
     }
   };
 
-  const filteredUsers = users.filter(user => 
-    user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    user.email.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredUsers = users.filter(
+    (user) =>
+      user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -98,8 +102,8 @@ export function UserManagement({ currentUserId }: { currentUserId?: number }) {
           </div>
           <div className="relative w-full md:w-72">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input 
-              placeholder="Search users..." 
+            <Input
+              placeholder="Search users..."
               className="pl-9 bg-background/50 border-border/50 focus:ring-primary/20"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -111,7 +115,9 @@ export function UserManagement({ currentUserId }: { currentUserId?: number }) {
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20 gap-4 text-muted-foreground">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <p className="animate-pulse font-medium">Loading user database...</p>
+            <p className="animate-pulse font-medium">
+              Loading user database...
+            </p>
           </div>
         ) : filteredUsers.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
@@ -126,12 +132,17 @@ export function UserManagement({ currentUserId }: { currentUserId?: number }) {
                   <TableHead className="w-[300px] py-4">User</TableHead>
                   <TableHead className="w-[120px]">Role</TableHead>
                   <TableHead className="w-[120px]">Status</TableHead>
-                  <TableHead className="text-right w-[150px]">Actions</TableHead>
+                  <TableHead className="text-right w-[150px]">
+                    Actions
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredUsers.map((user) => (
-                  <TableRow key={user.id} className="group hover:bg-muted/10 transition-colors">
+                  <TableRow
+                    key={user.id}
+                    className="group hover:bg-muted/10 transition-colors"
+                  >
                     <TableCell className="py-4">
                       <div className="flex items-center gap-3">
                         <Avatar className="h-10 w-10 border border-border/50 ring-offset-2 ring-primary/10 group-hover:ring-2 transition-all">
@@ -153,7 +164,10 @@ export function UserManagement({ currentUserId }: { currentUserId?: number }) {
                     <TableCell>
                       <div className="flex items-center gap-1.5">
                         {user.role === 'ADMIN' ? (
-                          <Badge variant="default" className="bg-rose-500/10 text-rose-500 hover:bg-rose-500/20 border-rose-500/20 px-2 py-0">
+                          <Badge
+                            variant="default"
+                            className="bg-rose-500/10 text-rose-500 hover:bg-rose-500/20 border-rose-500/20 px-2 py-0"
+                          >
                             <Shield className="h-3 w-3 mr-1" />
                             Admin
                           </Badge>
@@ -166,14 +180,20 @@ export function UserManagement({ currentUserId }: { currentUserId?: number }) {
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <div className={cn(
-                          "h-2 w-2 rounded-full",
-                          user.isActive ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" : "bg-rose-500"
-                        )} />
-                        <span className={cn(
-                          "text-xs font-medium",
-                          user.isActive ? "text-emerald-600" : "text-rose-600"
-                        )}>
+                        <div
+                          className={cn(
+                            'h-2 w-2 rounded-full',
+                            user.isActive
+                              ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]'
+                              : 'bg-rose-500'
+                          )}
+                        />
+                        <span
+                          className={cn(
+                            'text-xs font-medium',
+                            user.isActive ? 'text-emerald-600' : 'text-rose-600'
+                          )}
+                        >
                           {user.isActive ? 'Activated' : 'Deactivated'}
                         </span>
                       </div>
@@ -184,10 +204,12 @@ export function UserManagement({ currentUserId }: { currentUserId?: number }) {
                           <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
                         ) : (
                           <div className="flex items-center gap-2">
-                              <span>Activate</span>
-                            <Switch 
+                            <span>Activate</span>
+                            <Switch
                               checked={user.isActive}
-                              onCheckedChange={() => handleToggleStatus(user.id, user.isActive)}
+                              onCheckedChange={() =>
+                                handleToggleStatus(user.id, user.isActive)
+                              }
                               disabled={user.id === currentUserId}
                               className="data-[state=checked]:bg-emerald-500"
                             />

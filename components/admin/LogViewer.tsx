@@ -167,7 +167,8 @@ export function LogViewer() {
                   ? 'All'
                   : filterLevel === 'warn'
                     ? 'Warning'
-                    : filterLevel.charAt(0).toUpperCase() + filterLevel.slice(1)}
+                    : filterLevel.charAt(0).toUpperCase() +
+                      filterLevel.slice(1)}
                 <ChevronDown className="size-3 text-muted-foreground" />
               </Button>
             </DropdownMenuTrigger>

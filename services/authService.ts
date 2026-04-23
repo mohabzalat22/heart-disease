@@ -37,7 +37,9 @@ export class AuthService {
     }
 
     if (!user.isActive) {
-      throw new Error('Your account has been deactivated. Please contact support.');
+      throw new Error(
+        'Your account has been deactivated. Please contact support.'
+      );
     }
 
     const token = await signToken({
