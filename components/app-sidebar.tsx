@@ -128,7 +128,7 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
             <Link href="/admin?view=logs" className="w-full">
               <SidebarMenuButton
                 isActive={isAdminPath && currentView === 'logs'}
-                tooltip="User Logs"
+                tooltip="System Logs"
                 className={cn(
                   'px-4 py-6 hover:bg-sidebar-accent transition-all duration-200 w-full justify-start',
                   isAdminPath &&
@@ -152,7 +152,7 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
                       : 'text-foreground/70'
                   )}
                 >
-                  User Logs
+                  System Logs
                 </span>
               </SidebarMenuButton>
             </Link>
