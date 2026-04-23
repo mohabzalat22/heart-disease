@@ -36,6 +36,10 @@ export class AuthService {
       throw new Error('Invalid credentials');
     }
 
+    if (!user.isActive) {
+      throw new Error('Your account has been deactivated. Please contact support.');
+    }
+
     const token = await signToken({
       userId: user.id,
       email: user.email,

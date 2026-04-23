@@ -14,6 +14,7 @@ model User {
   password String
   image    String?
   role     Role    @default(USER)
+  isActive Boolean @default(true)
   chats    Chat[]
   prompt   Prompt?
 }

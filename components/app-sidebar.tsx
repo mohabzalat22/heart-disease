@@ -8,6 +8,7 @@ import {
   Settings,
   LogOut,
   MoreHorizontal,
+  Users,
 } from 'lucide-react';
 
 import {
@@ -152,6 +153,39 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
                   )}
                 >
                   User Logs
+                </span>
+              </SidebarMenuButton>
+            </Link>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <Link href="/admin?view=users" className="w-full">
+              <SidebarMenuButton
+                isActive={isAdminPath && currentView === 'users'}
+                tooltip="Manage Users"
+                className={cn(
+                  'px-4 py-6 hover:bg-sidebar-accent transition-all duration-200 w-full justify-start',
+                  isAdminPath &&
+                    currentView === 'users' &&
+                    'bg-sidebar-accent shadow-sm ring-1 ring-border/50'
+                )}
+              >
+                <Users
+                  className={cn(
+                    'h-4 w-4 flex-shrink-0 mr-2',
+                    isAdminPath && currentView === 'users'
+                      ? 'text-primary'
+                      : 'text-muted-foreground'
+                  )}
+                />
+                <span
+                  className={cn(
+                    'font-medium text-sm',
+                    isAdminPath && currentView === 'users'
+                      ? 'text-primary font-semibold'
+                      : 'text-foreground/70'
+                  )}
+                >
+                  Manage Users
                 </span>
               </SidebarMenuButton>
             </Link>

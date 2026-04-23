@@ -107,3 +107,36 @@ export async function getLogs(
     return { logs: [], total: 0, pages: 0 };
   }
 }
+
+export async function getAllUsers() {
+  const isAdmin = await checkAdmin();
+  if (!isAdmin) {
+    throw new Error('Unauthorized: Admin access required');
+  }
+
+  const users = await UserRepo.findAll();
+  // Strip passwords
+  return users.map((user) => user);
+}
+
+export async function toggleUserStatus(userId: number, isActive: boolean) {
+  const cookieStore = await cookies();
+  const token = cookieStore.get('auth_token')?.value;
+  if (!token) throw new Error('Unauthorized');
+
+  const payload = await verifyToken(token);
+  if (!payload) throw new Error('Unauthorized');
+
+  if (payload.userId === userId && !isActive) {
+    throw new Error('You cannot deactivate your own account.');
+  }
+
+  const admin = await UserRepo.findById(payload.userId);
+  if (!admin || admin.role !== 'ADMIN') {
+    throw new Error('Unauthorized: Admin access required');
+  }
+
+  await UserRepo.updateStatus(userId, isActive);
+  revalidatePath('/admin');
+  return { success: true };
+}

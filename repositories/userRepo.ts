@@ -26,4 +26,17 @@ export class UserRepo {
       data,
     });
   }
+
+  static async findAll() {
+    return prisma.user.findMany({
+      orderBy: { id: 'asc' },
+    });
+  }
+
+  static async updateStatus(id: number, isActive: boolean) {
+    return prisma.user.update({
+      where: { id },
+      data: { isActive },
+    });
+  }
 }
