@@ -36,9 +36,10 @@ import { toast } from 'sonner';
 interface ChatActionsProps {
   token: string;
   initialTitle: string;
+  onUpdate?: () => void;
 }
 
-export function ChatActions({ token, initialTitle }: ChatActionsProps) {
+export function ChatActions({ token, initialTitle, onUpdate }: ChatActionsProps) {
   const router = useRouter();
   const [isRenameOpen, setIsRenameOpen] = React.useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = React.useState(false);
@@ -57,6 +58,8 @@ export function ChatActions({ token, initialTitle }: ChatActionsProps) {
       await updateChatTitle(token, title);
       setIsRenameOpen(false);
       toast.success('Chat renamed successfully');
+      router.refresh();
+      if (onUpdate) onUpdate();
     } catch {
       toast.error('Failed to rename chat');
     } finally {
@@ -70,6 +73,7 @@ export function ChatActions({ token, initialTitle }: ChatActionsProps) {
       const result = await deleteChat(token);
       if (result?.success) {
         toast.success('Chat deleted successfully');
+        if (onUpdate) onUpdate();
         router.push('/chat');
       } else {
         toast.error('Failed to delete chat');

@@ -176,6 +176,7 @@ export function HistoryModal({ open, onOpenChange }: HistoryModalProps) {
                           <ChatActions
                             token={chat.token}
                             initialTitle={chat.title || 'New Assessment'}
+                            onUpdate={fetchChats}
                           />
                         </div>
                       </div>
