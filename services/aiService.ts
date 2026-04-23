@@ -10,7 +10,7 @@ export const AIService = {
    * @param chatId - The chat ID to get message context from
    * @returns ReadableStream with Ollama response
    */
-  respond: async (chatId: number) => {
+  respond: async (chatId: number, userId: number) => {
     // Get all messages from specific chat for context
     const messages = await MessageService.getAll(chatId);
 
@@ -18,7 +18,18 @@ export const AIService = {
       throw new Error('Unable to fetch messages for context');
     }
 
-    const prompt = await prisma.prompt.findFirst();
+    const systemConfig = await prisma.systemConfig.findFirst({
+      where: { id: 1 },
+    });
+    
+    const userPrompt = await prisma.prompt.findUnique({
+      where: { userId },
+    });
+
+    const systemPrompt = [
+      systemConfig?.defaultPrompt,
+      userPrompt?.prompt
+    ].filter(Boolean).join('\n\n');
 
     // Create a ReadableStream that streams Ollama response in SSE format
     const stream = new ReadableStream({
@@ -37,8 +48,8 @@ export const AIService = {
               body: JSON.stringify({
                 model: process.env.OLLAMA_MODEL || 'minimax-m2.5:cloud', // Using the model currently available in Ollama
                 messages: [
-                  ...(prompt?.prompt
-                    ? [{ role: 'system', content: prompt.prompt }]
+                  ...(systemPrompt
+                    ? [{ role: 'system', content: systemPrompt }]
                     : []),
                   ...messages.map((m: Message) => ({
                     role: m.actor === Actor.USER ? 'user' : 'assistant',

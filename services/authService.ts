@@ -20,6 +20,7 @@ export class AuthService {
       userId: user.id,
       email: user.email,
       name: user.name,
+      role: user.role as 'USER' | 'ADMIN',
     });
     return { user, token };
   }
@@ -39,6 +40,7 @@ export class AuthService {
       userId: user.id,
       email: user.email,
       name: user.name,
+      role: user.role as 'USER' | 'ADMIN',
     });
     return { user, token };
   }

@@ -8,17 +8,14 @@ datasource db {
 }
 
 model User {
-  id       Int    @id @default(autoincrement())
-  password String
+  id       Int     @id @default(autoincrement())
   name     String
-  email    String @unique
+  email    String  @unique
+  password String
   image    String?
-
-  /**
-   * relations
-   */
-  chats  Chat[]
-  prompt Prompt?
+  role     Role    @default(USER)
+  chats    Chat[]
+  prompt   Prompt?
 }
 
 model Chat {
@@ -26,19 +23,11 @@ model Chat {
   title     String?
   token     String    @unique
   userId    Int
+  createdAt DateTime  @default(now())
   isShared  Boolean   @default(false)
   sharedAt  DateTime?
-  createdAt DateTime  @default(now())
-  /**
-   * relations
-   */
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   messages  Message[]
-}
-
-enum Actor {
-  USER
-  ASSISTANT
 }
 
 model Message {
@@ -47,20 +36,28 @@ model Message {
   actor     Actor
   message   String
   createdAt DateTime @default(now())
-
-  /**
-   * relations
-   */
-  chat Chat @relation(fields: [chatId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  chat      Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
 }
 
 model Prompt {
   id     Int    @id @default(autoincrement())
-  prompt String 
+  prompt String
   userId Int    @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
 
-  /**
-   * relations
-   */
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+model SystemConfig {
+  id            Int      @id @default(1)
+  defaultPrompt String   @db.Text
+  updatedAt     DateTime @updatedAt
+}
+
+enum Actor {
+  USER
+  ASSISTANT
+}
+
+enum Role {
+  USER
+  ADMIN
 }

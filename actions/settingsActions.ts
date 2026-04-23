@@ -54,7 +54,9 @@ export async function updateProfile(
       userId: updatedUser.id,
       email: updatedUser.email,
       name: updatedUser.name,
+      role: updatedUser.role,
     });
+
     await setAuthCookie(newToken);
 
     revalidatePath('/settings');

@@ -17,6 +17,7 @@ export interface UserSession {
   userId: number;
   email: string;
   name: string;
+  role: 'USER' | 'ADMIN';
 }
 
 export interface JWTPayload extends UserSession {

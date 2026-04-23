@@ -54,7 +54,7 @@ export async function POST(req: Request) {
     }
 
     // Get streaming response from AI
-    const stream = await AIService.respond(currentChatId);
+    const stream = await AIService.respond(currentChatId, verifiedUser.userId);
 
     // Collect response in background to save it
     let fullResponse = '';
