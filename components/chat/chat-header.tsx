@@ -29,7 +29,7 @@ export function ChatHeader({ user, chatId, token, isShared }: ChatHeaderProps) {
     <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-border/50 bg-background/60 px-4 backdrop-blur-xl transition-all duration-300">
       <div className="flex items-center gap-2">
         <SidebarTrigger className="hover:bg-accent transition-colors duration-200" />
-        <Separator orientation="vertical" className="mr-2 h-4" />
+        <Separator orientation="vertical" className="mr-2 h-4 my-4" />
         <h1 className="text-sm font-semibold tracking-tight sm:text-base">
           Heart Disease Risk Assessment
         </h1>
@@ -60,7 +60,7 @@ export function ChatHeader({ user, chatId, token, isShared }: ChatHeaderProps) {
             <Share2 className="h-4 w-4" />
           </Button>
         )}
-        <Separator orientation="vertical" className="mx-1 h-4" />
+        <Separator orientation="vertical" className="mx-1 h-4 my-4" />
         <ModeToggle />
         <UserButton user={user} />
       </div>
