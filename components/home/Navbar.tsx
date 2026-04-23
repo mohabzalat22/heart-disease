@@ -6,6 +6,7 @@ import { verifyToken } from '@/lib/auth';
 import { UserRepo } from '@/repositories/userRepo';
 
 import { UserButton } from './user-button';
+import { ModeToggle } from '@/components/mode-toggle';
 
 export default async function Navbar() {
   const cookieStore = await cookies();
@@ -52,11 +53,15 @@ export default async function Navbar() {
 
         <div className="flex items-center gap-3">
           {user ? (
-            <UserButton
-              user={{ name: user.name, email: user.email, image: user.image }}
-            />
+            <>
+              <ModeToggle />
+              <UserButton
+                user={{ name: user.name, email: user.email, image: user.image }}
+              />
+            </>
           ) : (
             <>
+              <ModeToggle />
               <Button
                 variant="ghost"
                 size="sm"

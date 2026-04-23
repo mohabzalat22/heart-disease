@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { UserButton } from '@/components/home/user-button';
 import { useHistory } from '@/hooks/use-history';
 import { ShareDialog } from '@/components/chat/share-dialog';
+import { ModeToggle } from '@/components/mode-toggle';
 
 interface ChatHeaderProps {
   user: {
@@ -60,6 +61,7 @@ export function ChatHeader({ user, chatId, token, isShared }: ChatHeaderProps) {
           </Button>
         )}
         <Separator orientation="vertical" className="mx-1 h-4" />
+        <ModeToggle />
         <UserButton user={user} />
       </div>
 
