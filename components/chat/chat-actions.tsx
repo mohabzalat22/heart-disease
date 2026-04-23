@@ -39,7 +39,11 @@ interface ChatActionsProps {
   onUpdate?: () => void;
 }
 
-export function ChatActions({ token, initialTitle, onUpdate }: ChatActionsProps) {
+export function ChatActions({
+  token,
+  initialTitle,
+  onUpdate,
+}: ChatActionsProps) {
   const router = useRouter();
   const [isRenameOpen, setIsRenameOpen] = React.useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = React.useState(false);
