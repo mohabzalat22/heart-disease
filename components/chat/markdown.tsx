@@ -17,13 +17,39 @@ export function Markdown({ content }: MarkdownProps) {
     <ReactMarkdown
       remarkPlugins={[remarkGfm]}
       components={{
-        p: ({ children }) => <p className="mb-4 last:mb-0 leading-relaxed text-foreground/90">{children}</p>,
-        h1: ({ children }) => <h1 className="text-2xl font-bold mt-8 mb-4 text-foreground">{children}</h1>,
-        h2: ({ children }) => <h2 className="text-xl font-semibold mt-6 mb-3 text-foreground">{children}</h2>,
-        h3: ({ children }) => <h3 className="text-lg font-medium mt-4 mb-2 text-foreground">{children}</h3>,
-        ul: ({ children }) => <ul className="list-disc pl-6 mb-4 space-y-2 text-foreground/90">{children}</ul>,
-        ol: ({ children }) => <ol className="list-decimal pl-6 mb-4 space-y-2 text-foreground/90">{children}</ol>,
-        li: ({ children }) => <li className="marker:text-primary/60">{children}</li>,
+        p: ({ children }) => (
+          <p className="mb-4 last:mb-0 leading-relaxed text-foreground/90">
+            {children}
+          </p>
+        ),
+        h1: ({ children }) => (
+          <h1 className="text-2xl font-bold mt-8 mb-4 text-foreground">
+            {children}
+          </h1>
+        ),
+        h2: ({ children }) => (
+          <h2 className="text-xl font-semibold mt-6 mb-3 text-foreground">
+            {children}
+          </h2>
+        ),
+        h3: ({ children }) => (
+          <h3 className="text-lg font-medium mt-4 mb-2 text-foreground">
+            {children}
+          </h3>
+        ),
+        ul: ({ children }) => (
+          <ul className="list-disc pl-6 mb-4 space-y-2 text-foreground/90">
+            {children}
+          </ul>
+        ),
+        ol: ({ children }) => (
+          <ol className="list-decimal pl-6 mb-4 space-y-2 text-foreground/90">
+            {children}
+          </ol>
+        ),
+        li: ({ children }) => (
+          <li className="marker:text-primary/60">{children}</li>
+        ),
         blockquote: ({ children }) => (
           <blockquote className="border-l-4 border-primary/30 pl-4 py-1 my-4 italic text-muted-foreground bg-muted/30 rounded-r-sm">
             {children}
@@ -35,14 +61,22 @@ export function Markdown({ content }: MarkdownProps) {
             <table className="w-full border-collapse text-sm">{children}</table>
           </div>
         ),
-        thead: ({ children }) => <thead className="bg-muted/50">{children}</thead>,
+        thead: ({ children }) => (
+          <thead className="bg-muted/50">{children}</thead>
+        ),
         th: ({ children }) => (
           <th className="border border-border px-4 py-2 text-left font-semibold text-foreground">
             {children}
           </th>
         ),
-        td: ({ children }) => <td className="border border-border px-4 py-2 text-foreground/80">{children}</td>,
-        strong: ({ children }) => <strong className="font-semibold text-foreground">{children}</strong>,
+        td: ({ children }) => (
+          <td className="border border-border px-4 py-2 text-foreground/80">
+            {children}
+          </td>
+        ),
+        strong: ({ children }) => (
+          <strong className="font-semibold text-foreground">{children}</strong>
+        ),
         a: ({ ...props }) => (
           <a
             {...props}

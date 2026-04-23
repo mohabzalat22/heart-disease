@@ -110,8 +110,8 @@ export function ChatContainer({
 
   return (
     <SidebarInset className="flex flex-col h-screen overflow-hidden bg-background/50">
-      <ChatHeader 
-        user={user} 
+      <ChatHeader
+        user={user}
         chatId={chatId}
         token={token}
         isShared={isShared}

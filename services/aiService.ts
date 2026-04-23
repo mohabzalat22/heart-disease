@@ -21,15 +21,14 @@ export const AIService = {
     const systemConfig = await prisma.systemConfig.findFirst({
       where: { id: 1 },
     });
-    
+
     const userPrompt = await prisma.prompt.findUnique({
       where: { userId },
     });
 
-    const systemPrompt = [
-      systemConfig?.defaultPrompt,
-      userPrompt?.prompt
-    ].filter(Boolean).join('\n\n');
+    const systemPrompt = [systemConfig?.defaultPrompt, userPrompt?.prompt]
+      .filter(Boolean)
+      .join('\n\n');
 
     // Create a ReadableStream that streams Ollama response in SSE format
     const stream = new ReadableStream({

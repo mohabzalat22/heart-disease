@@ -24,8 +24,10 @@ export function BreadcrumbNav() {
             <Link href="/">Home</Link>
           </BreadcrumbLink>
         </BreadcrumbItem>
-        {paths.length > 0 && <BreadcrumbSeparator className="hidden md:block" />}
-        
+        {paths.length > 0 && (
+          <BreadcrumbSeparator className="hidden md:block" />
+        )}
+
         {paths.map((path, index) => {
           const isLast = index === paths.length - 1;
           const url = `/${paths.slice(0, index + 1).join('/')}`;

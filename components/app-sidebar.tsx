@@ -56,22 +56,28 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
     : user.email[0].toUpperCase();
 
   return (
-    <Sidebar 
-      collapsible="icon" 
+    <Sidebar
+      collapsible="icon"
       className="border-r border-border/50 bg-sidebar/50 backdrop-blur-xl"
       {...props}
     >
       <SidebarHeader className="p-4">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild className="hover:bg-sidebar-accent/50 transition-colors">
+            <SidebarMenuButton
+              size="lg"
+              asChild
+              className="hover:bg-sidebar-accent/50 transition-colors"
+            >
               <Link href="/admin">
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-md">
                   <ShieldCheck className="size-4" />
                 </div>
                 <div className="flex flex-col gap-0.5 leading-none ml-2">
                   <span className="font-semibold text-sm">CardioAI Admin</span>
-                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">Dashboard</span>
+                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">
+                    Dashboard
+                  </span>
                 </div>
               </Link>
             </SidebarMenuButton>
@@ -102,7 +108,9 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
                 <span
                   className={cn(
                     'font-medium text-sm',
-                    pathname === '/admin' ? 'text-primary font-semibold' : 'text-foreground/70'
+                    pathname === '/admin'
+                      ? 'text-primary font-semibold'
+                      : 'text-foreground/70'
                   )}
                 >
                   System Prompt
@@ -181,5 +189,3 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
     </Sidebar>
   );
 }
-
-

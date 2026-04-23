@@ -1,4 +1,8 @@
-import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
+import {
+  SidebarProvider,
+  SidebarInset,
+  SidebarTrigger,
+} from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/app-sidebar';
 import { BreadcrumbNav } from '@/components/breadcrumb-nav';
 import { Separator } from '@/components/ui/separator';
@@ -31,12 +35,18 @@ export default async function AdminLayout({
     return (
       <div className="flex items-center justify-center min-h-screen bg-background p-4">
         <div className="max-w-md w-full">
-          <Alert variant="destructive" className="flex flex-col items-center text-center p-8 space-y-4">
+          <Alert
+            variant="destructive"
+            className="flex flex-col items-center text-center p-8 space-y-4"
+          >
             <ShieldAlert className="w-12 h-12 mb-2" />
             <div className="space-y-2">
-              <AlertTitle className="text-2xl font-bold">Access Denied</AlertTitle>
+              <AlertTitle className="text-2xl font-bold">
+                Access Denied
+              </AlertTitle>
               <AlertDescription className="text-muted-foreground text-base">
-                You do not have the necessary permissions to access the admin dashboard.
+                You do not have the necessary permissions to access the admin
+                dashboard.
               </AlertDescription>
             </div>
             <Button asChild variant="outline" className="mt-4">

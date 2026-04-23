@@ -35,9 +35,10 @@ export function ShareDialog({
   const [isLoading, setIsLoading] = React.useState(false);
   const [isCopied, setIsCopied] = React.useState(false);
 
-  const shareUrl = typeof window !== 'undefined' 
-    ? `${window.location.origin}/share/${token}`
-    : '';
+  const shareUrl =
+    typeof window !== 'undefined'
+      ? `${window.location.origin}/share/${token}`
+      : '';
 
   const handleToggleShare = async () => {
     setIsLoading(true);
@@ -92,13 +93,13 @@ export function ShareDialog({
                 <span className="text-sm font-medium">Public Visibility</span>
               </div>
               <p className="text-xs text-muted-foreground">
-                {isPublic 
-                  ? 'Anyone with the link can view this chat.' 
+                {isPublic
+                  ? 'Anyone with the link can view this chat.'
                   : 'Only you can view this chat.'}
               </p>
             </div>
             <Button
-              variant={isPublic ? "default" : "outline"}
+              variant={isPublic ? 'default' : 'outline'}
               size="sm"
               disabled={isLoading}
               onClick={handleToggleShare}
@@ -116,7 +117,10 @@ export function ShareDialog({
 
           {isPublic && (
             <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
-              <Label htmlFor="share-url" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <Label
+                htmlFor="share-url"
+                className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+              >
                 Shareable Link
               </Label>
               <div className="flex items-center gap-2">

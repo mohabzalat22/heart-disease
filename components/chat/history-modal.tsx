@@ -135,12 +135,14 @@ export function HistoryModal({ open, onOpenChange }: HistoryModalProps) {
             </div>
           </div>
         </DialogHeader>
-        
+
         <ScrollArea className="h-[60vh] p-6">
           {isLoading ? (
             <div className="flex flex-col items-center justify-center h-full py-20 gap-4">
               <Loader2 className="h-8 w-8 text-primary animate-spin" />
-              <p className="text-sm text-muted-foreground animate-pulse">Retrieving your assessment history...</p>
+              <p className="text-sm text-muted-foreground animate-pulse">
+                Retrieving your assessment history...
+              </p>
             </div>
           ) : filteredChats.length > 0 ? (
             <div className="space-y-8">
@@ -186,9 +188,9 @@ export function HistoryModal({ open, onOpenChange }: HistoryModalProps) {
             <div className="flex flex-col items-center justify-center py-24 text-center gap-5">
               <div className="p-5 rounded-3xl bg-muted/30 border border-border/50 shadow-inner">
                 {searchQuery ? (
-                   <Search className="h-9 w-9 text-muted-foreground/30" />
+                  <Search className="h-9 w-9 text-muted-foreground/30" />
                 ) : (
-                   <MessageSquare className="h-9 w-9 text-muted-foreground/30" />
+                  <MessageSquare className="h-9 w-9 text-muted-foreground/30" />
                 )}
               </div>
               <div className="space-y-2 max-w-[280px]">
@@ -196,13 +198,13 @@ export function HistoryModal({ open, onOpenChange }: HistoryModalProps) {
                   {searchQuery ? 'No results found' : 'No assessments found'}
                 </p>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  {searchQuery 
+                  {searchQuery
                     ? `We couldn't find any assessments matching "${searchQuery}".`
                     : 'Your assessment history will appear here once you start your first conversation.'}
                 </p>
                 {searchQuery && (
-                  <Button 
-                    variant="link" 
+                  <Button
+                    variant="link"
                     className="text-primary font-semibold hover:no-underline px-0 h-auto mt-2"
                     onClick={() => setSearchQuery('')}
                   >

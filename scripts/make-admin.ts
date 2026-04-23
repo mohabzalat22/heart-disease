@@ -7,7 +7,9 @@ async function makeAdmin(email: string) {
     });
 
     if (!user) {
-      console.error(`\n[!] Error: No user found with email "${email}".\n[!] Please sign up in the application first, then run this script again.\n`);
+      console.error(
+        `\n[!] Error: No user found with email "${email}".\n[!] Please sign up in the application first, then run this script again.\n`
+      );
       return;
     }
 
@@ -15,7 +17,7 @@ async function makeAdmin(email: string) {
       where: { email },
       data: { role: 'ADMIN' },
     });
-    
+
     console.log(`\n[✓] Success! User ${email} has been promoted to ADMIN.\n`);
   } catch (error) {
     console.error('\n[!] An unexpected error occurred:', error);
