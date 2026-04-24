@@ -7,6 +7,7 @@ A full-stack AI-powered chat application built with **Next.js**, **PostgreSQL**,
 ## 📋 Table of Contents
 
 - [Overview](#overview)
+- [Features](#features)
 - [Tech Stack](#tech-stack)
 - [Prerequisites](#prerequisites)
 - [Dependencies](#dependencies)
@@ -21,6 +22,31 @@ A full-stack AI-powered chat application built with **Next.js**, **PostgreSQL**,
 ## Overview
 
 CardioAI is a Next.js web application that provides users with a chat interface powered by a locally running Ollama LLM. Users can register, log in, manage multiple chat sessions, and interact with an AI assistant trained or prompted for heart disease-related conversations.
+
+## Features
+
+CardioAI includes the following core features:
+
+| Feature                  | Description                                                                                                   |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------- |
+| AI-Powered Analysis      | Analyzes health data with a machine learning model trained on patient records to estimate heart disease risk. |
+| Conversational Interface | Lets users chat naturally with the assistant instead of filling out long or confusing forms.                  |
+| Detailed Risk Report     | Returns a structured breakdown of risk level with personalized recommendations and next steps.                |
+| Private & Secure         | Keeps health data encrypted and never shared, with privacy treated as a first priority.                       |
+| User Authentication      | Supports sign up, login, and protected access for personalized sessions.                                      |
+| Chat History             | Lets users create, revisit, and continue multiple chat sessions.                                              |
+| Shared Assessments       | Generates shareable assessment pages for viewing results outside the private chat view.                       |
+| Settings Management      | Gives users a place to update account-related preferences and profile settings.                               |
+
+### Admin Features
+
+The admin dashboard includes operational tools for managing the application:
+
+| Feature              | Description                                                                                |
+| -------------------- | ------------------------------------------------------------------------------------------ |
+| System Prompt Editor | Updates the default system prompt used for AI interactions, with edit and preview support. |
+| Log Viewer           | Monitors application logs with filtering by level and date, plus paginated browsing.       |
+| User Management      | Searches users, views roles and status, and activates or deactivates accounts.             |
 
 ---
 
