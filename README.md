@@ -298,19 +298,19 @@ npm run docker:ps:dev
 npm run docker:down:dev
 ```
 
-These scripts use `.env.development` via `docker compose --env-file .env.development ...`.
+These scripts use `.env.development` via `docker compose --profile tools --env-file .env.development ...`.
 
 ### 8. Equivalent raw Docker Compose commands
 
 ```bash
 # View logs
-docker compose logs -f app
+docker compose --profile tools logs -f app
 
 # Stop stack
-docker compose down
+docker compose --profile tools down
 
 # Stop stack and remove volumes
-docker compose down -v
+docker compose --profile tools down -v
 ```
 
 Volumes used:
