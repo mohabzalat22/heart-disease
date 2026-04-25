@@ -1,7 +1,11 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { getAllUsers, toggleUserStatus } from '@/actions/adminActions';
+import {
+  getAllUsers,
+  toggleUserStatus,
+  updateUserTokens,
+} from '@/actions/adminActions';
 import {
   Table,
   TableBody,
@@ -26,8 +30,10 @@ import {
   Shield,
   Loader2,
   AlertCircle,
+  Coins,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
@@ -38,6 +44,7 @@ interface User {
   image: string | null;
   role: string;
   isActive: boolean;
+  tokens: number;
 }
 
 export function UserManagement({ currentUserId }: { currentUserId?: number }) {
@@ -45,6 +52,8 @@ export function UserManagement({ currentUserId }: { currentUserId?: number }) {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [togglingId, setTogglingId] = useState<number | null>(null);
+  const [savingTokenId, setSavingTokenId] = useState<number | null>(null);
+  const [tokenDrafts, setTokenDrafts] = useState<Record<number, string>>({});
 
   useEffect(() => {
     fetchUsers();
@@ -54,7 +63,13 @@ export function UserManagement({ currentUserId }: { currentUserId?: number }) {
     try {
       setLoading(true);
       const data = await getAllUsers();
-      setUsers(data as User[]);
+      const parsedUsers = data as User[];
+      setUsers(parsedUsers);
+      setTokenDrafts(
+        Object.fromEntries(
+          parsedUsers.map((user) => [user.id, String(user.tokens)])
+        )
+      );
     } catch {
       toast.error('Failed to fetch users.');
     } finally {
@@ -78,6 +93,37 @@ export function UserManagement({ currentUserId }: { currentUserId?: number }) {
       toast.error('Failed to update user status.');
     } finally {
       setTogglingId(null);
+    }
+  };
+
+  const handleUpdateTokens = async (user: User) => {
+    if (user.role === 'ADMIN') {
+      return;
+    }
+
+    const draftValue = tokenDrafts[user.id] ?? String(user.tokens);
+    const parsed = Number(draftValue);
+
+    if (!Number.isInteger(parsed) || parsed < 0) {
+      toast.error('Tokens must be a non-negative whole number.');
+      return;
+    }
+
+    if (parsed === user.tokens) {
+      return;
+    }
+
+    try {
+      setSavingTokenId(user.id);
+      await updateUserTokens(user.id, parsed);
+      setUsers((prev) =>
+        prev.map((u) => (u.id === user.id ? { ...u, tokens: parsed } : u))
+      );
+      toast.success('Token balance updated.');
+    } catch {
+      toast.error('Failed to update token balance.');
+    } finally {
+      setSavingTokenId(null);
     }
   };
 
@@ -131,6 +177,7 @@ export function UserManagement({ currentUserId }: { currentUserId?: number }) {
                 <TableRow>
                   <TableHead className="w-[300px] py-4">User</TableHead>
                   <TableHead className="w-[120px]">Role</TableHead>
+                  <TableHead className="w-[220px]">Tokens</TableHead>
                   <TableHead className="w-[120px]">Status</TableHead>
                   <TableHead className="text-right w-[150px]">
                     Actions
@@ -177,6 +224,41 @@ export function UserManagement({ currentUserId }: { currentUserId?: number }) {
                           </Badge>
                         )}
                       </div>
+                    </TableCell>
+                    <TableCell>
+                      {user.role === 'ADMIN' ? (
+                        <Badge variant="outline" className="gap-1">
+                          <Coins className="h-3.5 w-3.5" />
+                          Unlimited
+                        </Badge>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <Input
+                            value={tokenDrafts[user.id] ?? ''}
+                            onChange={(e) =>
+                              setTokenDrafts((prev) => ({
+                                ...prev,
+                                [user.id]: e.target.value,
+                              }))
+                            }
+                            className="h-8 w-24"
+                            inputMode="numeric"
+                            pattern="[0-9]*"
+                          />
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleUpdateTokens(user)}
+                            disabled={savingTokenId === user.id}
+                          >
+                            {savingTokenId === user.id ? (
+                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            ) : (
+                              'Save'
+                            )}
+                          </Button>
+                        </div>
+                      )}
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">

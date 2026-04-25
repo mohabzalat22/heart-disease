@@ -140,3 +140,34 @@ export async function toggleUserStatus(userId: number, isActive: boolean) {
   revalidatePath('/admin');
   return { success: true };
 }
+
+export async function updateUserTokens(userId: number, tokens: number) {
+  const cookieStore = await cookies();
+  const token = cookieStore.get('auth_token')?.value;
+  if (!token) throw new Error('Unauthorized');
+
+  const payload = await verifyToken(token);
+  if (!payload) throw new Error('Unauthorized');
+
+  const admin = await UserRepo.findById(payload.userId);
+  if (!admin || admin.role !== 'ADMIN') {
+    throw new Error('Unauthorized: Admin access required');
+  }
+
+  if (!Number.isInteger(tokens) || tokens < 0) {
+    throw new Error('Tokens must be a non-negative integer.');
+  }
+
+  const targetUser = await UserRepo.findById(userId);
+  if (!targetUser) {
+    throw new Error('User not found.');
+  }
+
+  if (targetUser.role === 'ADMIN') {
+    throw new Error('Admin accounts do not use tokens.');
+  }
+
+  await UserRepo.setTokens(userId, tokens);
+  revalidatePath('/admin');
+  return { success: true };
+}

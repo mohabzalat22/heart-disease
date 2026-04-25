@@ -9,6 +9,7 @@ import {
   MoreHorizontal,
   User,
   LogOut,
+  Zap,
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import {
@@ -48,6 +49,7 @@ interface ChatSidebarProps {
     name: string;
     email: string;
     image?: string | null;
+    tokens: number;
   };
   chats: Chat[];
 }
@@ -56,6 +58,21 @@ export function ChatSidebar({ user, chats }: ChatSidebarProps) {
   const { isOpen, setIsOpen } = useHistory();
   const pathname = usePathname();
   const currentChatToken = pathname.split('/').pop();
+  const [tokensLeft, setTokensLeft] = React.useState(user.tokens);
+
+  React.useEffect(() => {
+    setTokensLeft(user.tokens);
+  }, [user.tokens]);
+
+  React.useEffect(() => {
+    const handleTokensConsumed = (e: Event) => {
+      const customEvent = e as CustomEvent<number>;
+      setTokensLeft((prev) => Math.max(0, prev - customEvent.detail));
+    };
+    
+    window.addEventListener('tokensConsumed', handleTokensConsumed);
+    return () => window.removeEventListener('tokensConsumed', handleTokensConsumed);
+  }, []);
 
   const initials = user.name
     ? user.name
@@ -140,6 +157,20 @@ export function ChatSidebar({ user, chats }: ChatSidebarProps) {
         </SidebarGroup>
 
         <SidebarGroup className="mt-auto">
+          <SidebarGroupContent>
+            <div className="px-4 py-3 mb-2 rounded-xl bg-gradient-to-br from-sidebar-accent/50 to-transparent border border-border/50">
+              <div className="flex items-center justify-between text-xs text-muted-foreground mb-1.5">
+                <span className="flex items-center gap-1.5 font-medium text-foreground/80">
+                  <Zap className="h-3.5 w-3.5 text-amber-500 fill-amber-500/20" /> 
+                  Tokens Remaining
+                </span>
+                <span className="font-bold text-foreground">{tokensLeft.toLocaleString()}</span>
+              </div>
+            </div>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
           <SidebarGroupLabel className="px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
             History
           </SidebarGroupLabel>

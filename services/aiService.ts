@@ -3,6 +3,7 @@ import { MessageService } from './messageService';
 import { Actor } from '@/generated/prisma';
 import { prisma } from '@/lib/prisma';
 import { logger } from '@/lib/logger';
+import { UserRepo } from '@/repositories/userRepo';
 
 export const AIService = {
   /**
@@ -30,6 +31,14 @@ export const AIService = {
       .filter(Boolean)
       .join('\n\n');
 
+    const userBalance = await UserRepo.checkTokenBalance(userId);
+    let numPredict: number | undefined;
+    if (userBalance.allowed && userBalance.remaining !== null) {
+      const promptText = [systemPrompt, ...messages.map((m: Message) => m.message)].filter(Boolean).join(' ');
+      const estimatedPromptTokens = Math.ceil(promptText.length / 4);
+      numPredict = Math.max(1, userBalance.remaining - estimatedPromptTokens);
+    }
+
     // Create a ReadableStream that streams Ollama response in SSE format
     const stream = new ReadableStream({
       async start(controller) {
@@ -37,6 +46,24 @@ export const AIService = {
 
         try {
           // Generate content with streaming from Ollama
+          const bodyPayload: Record<string, unknown> = {
+            model: process.env.OLLAMA_MODEL || 'minimax-m2.5:cloud', // Using the model currently available in Ollama
+            messages: [
+              ...(systemPrompt
+                ? [{ role: 'system', content: systemPrompt }]
+                : []),
+              ...messages.map((m: Message) => ({
+                role: m.actor === Actor.USER ? 'user' : 'assistant',
+                content: m.message,
+              })),
+            ],
+            stream: true,
+          };
+
+          if (numPredict !== undefined) {
+            bodyPayload.options = { num_predict: numPredict };
+          }
+
           const response = await fetch(
             `${process.env.OLLAMA_BASE_URL}/api/chat`,
             {
@@ -44,19 +71,7 @@ export const AIService = {
               headers: {
                 'Content-Type': 'application/json',
               },
-              body: JSON.stringify({
-                model: process.env.OLLAMA_MODEL || 'minimax-m2.5:cloud', // Using the model currently available in Ollama
-                messages: [
-                  ...(systemPrompt
-                    ? [{ role: 'system', content: systemPrompt }]
-                    : []),
-                  ...messages.map((m: Message) => ({
-                    role: m.actor === Actor.USER ? 'user' : 'assistant',
-                    content: m.message,
-                  })),
-                ],
-                stream: true,
-              }),
+              body: JSON.stringify(bodyPayload),
             }
           );
 
@@ -68,13 +83,15 @@ export const AIService = {
 
           const reader = response.body.getReader();
           const decoder = new TextDecoder();
+          let buffer = '';
 
           while (true) {
             const { done, value } = await reader.read();
             if (done) break;
 
-            const chunk = decoder.decode(value, { stream: true });
-            const lines = chunk.split('\n');
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n');
+            buffer = lines.pop() || ''; // Keep the incomplete line in buffer
 
             for (const line of lines) {
               if (line.trim() === '') continue;
@@ -85,6 +102,20 @@ export const AIService = {
                   // Send each chunk in SSE format
                   const sseMessage = `data: ${JSON.stringify({ content: parsed.message.content })}\n\n`;
                   controller.enqueue(encoder.encode(sseMessage));
+                }
+                
+                if (parsed.done) {
+                  const promptTokens = parsed.prompt_eval_count || 0;
+                  const completionTokens = parsed.eval_count || 0;
+                  const totalTokens = promptTokens + completionTokens;
+                  
+                  if (totalTokens > 0) {
+                    await UserRepo.deductTokens(userId, totalTokens);
+                    
+                    // Send usage metadata to the client
+                    const usageMessage = `data: ${JSON.stringify({ usage: { totalTokens } })}\n\n`;
+                    controller.enqueue(encoder.encode(usageMessage));
+                  }
                 }
               } catch (e) {
                 console.error('Ollama streaming error:', e);

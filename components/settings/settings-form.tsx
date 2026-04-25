@@ -26,6 +26,8 @@ interface SettingsFormProps {
     name: string;
     email: string;
     image?: string | null;
+    role: 'USER' | 'ADMIN';
+    tokens: number;
   };
   initialPrompt: string;
 }
@@ -156,6 +158,15 @@ export function SettingsForm({
                   </div>
 
                   <div className="space-y-4">
+                    {initialUser.role !== 'ADMIN' && (
+                      <div className="space-y-2">
+                        <Label>Available Tokens</Label>
+                        <Input value={String(initialUser.tokens)} disabled />
+                        <p className="text-xs text-muted-foreground">
+                          One token is used for each chat request.
+                        </p>
+                      </div>
+                    )}
                     <div className="space-y-2">
                       <Label htmlFor="name">Name</Label>
                       <Input

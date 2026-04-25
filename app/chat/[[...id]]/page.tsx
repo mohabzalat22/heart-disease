@@ -79,7 +79,7 @@ export default async function ChatPage({
     <SidebarProvider>
       <HistoryProvider>
         <ChatSidebar
-          user={{ name: user.name, email: user.email, image: user.image }}
+          user={{ name: user.name, email: user.email, image: user.image, tokens: user.tokens }}
           chats={chats}
         />
         <ChatContainer

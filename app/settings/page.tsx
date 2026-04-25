@@ -34,6 +34,8 @@ export default async function SettingsPage() {
             name: user.name,
             email: user.email,
             image: user.image,
+            role: user.role,
+            tokens: user.tokens,
           }}
           initialPrompt={prompt?.prompt || ''}
         />

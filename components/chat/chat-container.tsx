@@ -58,6 +58,15 @@ export function ChatContainer({
         body: JSON.stringify({ chatId, message: content }),
       });
 
+      if (response.status === 402) {
+        const errorData = await response.json();
+        setMessages((prev) => [
+          ...prev,
+          { role: 'assistant', content: errorData.error },
+        ]);
+        return;
+      }
+      
       if (!response.ok) throw new Error('Failed to send message');
 
       // Update URL if it's a new chat
@@ -71,31 +80,41 @@ export function ChatContainer({
 
       setMessages((prev) => [...prev, { role: 'assistant', content: '' }]);
 
+      let buffer = '';
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
 
-        const chunk = decoder.decode(value, { stream: true });
-        const lines = chunk.split('\n');
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || ''; // Keep the last incomplete line in buffer
 
         for (const line of lines) {
           if (line.startsWith('data: ')) {
             const data = line.slice(6);
             if (data === '[DONE]') break;
             try {
-              const { content } = JSON.parse(data);
-              assistantMessage += content;
-              setMessages((prev) => {
-                const newMessages = [...prev];
-                newMessages[newMessages.length - 1].content = assistantMessage;
-                return newMessages;
-              });
+              const parsedData = JSON.parse(data);
+              if (parsedData.content) {
+                assistantMessage += parsedData.content;
+                setMessages((prev) => {
+                  const newMessages = [...prev];
+                  newMessages[newMessages.length - 1].content = assistantMessage;
+                  return newMessages;
+                });
+              }
+              if (parsedData.usage && parsedData.usage.totalTokens) {
+                window.dispatchEvent(new CustomEvent('tokensConsumed', { detail: parsedData.usage.totalTokens }));
+              }
             } catch (e) {
-              console.error('Chat error:', e);
+              console.error('Chat error parsing SSE:', e, 'Data:', data);
             }
           }
         }
       }
+
+      // Refresh to update server components (e.g. token count in sidebar)
+      router.refresh();
 
       // Redirect if it was a new chat
       if (newChatId && chatId === 0) {
