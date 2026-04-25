@@ -37,6 +37,9 @@ CardioAI includes the following core features:
 | User Authentication      | Supports sign up, login, and protected access for personalized sessions.                                      |
 | Chat History             | Lets users create, revisit, and continue multiple chat sessions.                                              |
 | Shared Assessments       | Generates shareable assessment pages for viewing results outside the private chat view.                       |
+| Dark Mode Support        | Seamlessly switch between light and dark themes for a personalized and comfortable viewing experience.         |
+| Token Management         | Real-time tracking of AI token consumption with hard limits and dynamic UI balance updates.                   |
+| Motion UI                | Enhanced user experience with smooth entrance animations and micro-interactions using Framer Motion.           |
 | Settings Management      | Gives users a place to update account-related preferences and profile settings.                               |
 
 ### Admin Features
@@ -45,9 +48,9 @@ The admin dashboard includes operational tools for managing the application:
 
 | Feature              | Description                                                                                |
 | -------------------- | ------------------------------------------------------------------------------------------ |
-| System Prompt Editor | Updates the default system prompt used for AI interactions, with edit and preview support. |
-| Log Viewer           | Monitors application logs with filtering by level and date, plus paginated browsing.       |
-| User Management      | Searches users, views roles and status, and activates or deactivates accounts.             |
+| System Prompt Editor | Updates the default system prompt used for AI interactions, with edit and preview support.                      |
+| Log Viewer           | Monitors application logs with filtering by level and date, plus interactive metadata expansion for debugging. |
+| User Management      | Searches users, views roles and status, and activates or deactivates accounts.                                 |
 
 ---
 
@@ -62,6 +65,8 @@ The admin dashboard includes operational tools for managing the application:
 | Database      | PostgreSQL                       |
 | ORM           | Prisma v7                        |
 | AI / LLM      | Ollama (local inference)         |
+| Animation     | Framer Motion                    |
+| Theme         | next-themes                      |
 | Auth          | JWT via `jose` + bcrypt          |
 | Forms         | React Hook Form + Zod validation |
 
@@ -113,6 +118,11 @@ Make sure the following are installed on your system before setting up the proje
 | `clsx`                     | `^2.1.1`   | Conditional className utility              |
 | `tailwind-merge`           | `^3.5.0`   | Merges Tailwind classes without conflicts  |
 | `tw-animate-css`           | `^1.4.0`   | CSS animations for Tailwind                |
+| `framer-motion`            | `^12.38.0` | Production-ready motion library for React  |
+| `next-themes`              | `^0.4.6`   | Perfect dark mode management for Next.js   |
+| `react-markdown`           | `^10.1.0`  | Renders markdown content for AI responses  |
+| `react-syntax-highlighter` | `^16.1.1`  | Syntax highlighting for code blocks        |
+| `remark-gfm`               | `^4.0.1`   | GitHub Flavored Markdown support           |
 | `sonner`                   | `^2.0.7`   | Toast notification library                 |
 
 ### Development Dependencies
@@ -346,6 +356,18 @@ npx prisma generate
 # Open Prisma Studio (visual DB editor)
 npx prisma studio
 ```
+
+---
+
+## Token Management
+
+CardioAI implements a robust token-based quota system to manage LLM usage and prevent resource abuse:
+
+- **Initial Quota**: New users are granted a default balance of **500 tokens** upon registration.
+- **Pre-flight Checks**: The system verifies token availability before initiating any AI request.
+- **Hard Enforcement**: To prevent over-consumption, the system calculates a strict response limit (`num_predict`) based on the user's remaining balance and the prompt size.
+- **Real-time Deduction**: Tokens are deducted from the user's account in real-time once the AI response is completed, covering both prompt and completion tokens.
+- **UI Feedback**: Users can monitor their remaining balance directly in the chat interface, which updates dynamically after each interaction.
 
 ---
 
