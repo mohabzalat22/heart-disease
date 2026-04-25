@@ -13,13 +13,14 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'CardioAI — Heart Disease Risk Predictor',
+  title: 'CardioCare AI — Heart Disease Risk Predictor',
   description:
     'Get an AI-powered heart disease risk assessment in minutes. Understand your cardiovascular risk and take action today.',
 };
 
 import { Toaster } from 'sonner';
 import { ThemeProvider } from '@/components/theme-provider';
+import { PageTransition } from '@/components/page-transition';
 
 export default function RootLayout({
   children,
@@ -37,7 +38,9 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {children}
+          <PageTransition>
+            {children}
+          </PageTransition>
           <Toaster position="top-center" richColors />
         </ThemeProvider>
       </body>

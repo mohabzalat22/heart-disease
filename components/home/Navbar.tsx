@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Heart, ArrowRight } from 'lucide-react';
+import { Activity, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cookies } from 'next/headers';
 import { verifyToken } from '@/lib/auth';
@@ -25,9 +25,9 @@ export default async function Navbar() {
           className="flex items-center gap-2 text-foreground hover:opacity-90 transition-opacity"
         >
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-rose-500 shadow-sm shadow-rose-500/20">
-            <Heart className="h-4 w-4 text-white" fill="white" />
+            <Activity className="h-4 w-4 text-white" />
           </div>
-          <span className="text-lg font-bold tracking-tight">CardioAI</span>
+          <span className="text-lg font-bold tracking-tight">CardioCare AI</span>
         </Link>
 
         <div className="hidden items-center gap-8 md:flex">

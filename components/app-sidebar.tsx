@@ -9,6 +9,7 @@ import {
   LogOut,
   MoreHorizontal,
   Users,
+  Activity,
 } from 'lucide-react';
 
 import {
@@ -75,11 +76,11 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
               className="hover:bg-sidebar-accent/50 transition-colors"
             >
               <Link href="/admin">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-md">
-                  <ShieldCheck className="size-4" />
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-rose-500 text-white shadow-md">
+                  <Activity className="size-4" />
                 </div>
                 <div className="flex flex-col gap-0.5 leading-none ml-2">
-                  <span className="font-semibold text-sm">CardioAI Admin</span>
+                  <span className="font-semibold text-sm">CardioCare AI Admin</span>
                   <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">
                     Dashboard
                   </span>

@@ -1,4 +1,4 @@
-import { Heart } from 'lucide-react';
+import { Activity } from 'lucide-react';
 
 export default function Footer() {
   return (
@@ -7,9 +7,9 @@ export default function Footer() {
         <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
           <div className="flex items-center gap-2">
             <div className="flex h-6 w-6 items-center justify-center rounded-md bg-rose-500">
-              <Heart className="h-3 w-3 text-white" fill="white" />
+              <Activity className="h-3 w-3 text-white" />
             </div>
-            <span className="text-sm font-semibold">CardioAI</span>
+            <span className="text-sm font-semibold">CardioCare AI</span>
             <span className="text-sm text-muted-foreground">
               — AI Heart Disease Risk Predictor
             </span>
