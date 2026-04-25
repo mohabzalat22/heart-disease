@@ -13,6 +13,7 @@ A full-stack AI-powered chat application built with **Next.js**, **PostgreSQL**,
 - [Dependencies](#dependencies)
 - [Environment Variables](#environment-variables)
 - [Getting Started](#getting-started)
+- [Docker](#docker)
 - [Database Setup](#database-setup)
 - [Available Scripts](#available-scripts)
 - [Project Structure](#project-structure)
@@ -75,10 +76,13 @@ Make sure the following are installed on your system before setting up the proje
 - **PostgreSQL** `v14+` — [Download](https://www.postgresql.org/download/)
 - **Ollama** — [Download](https://ollama.com/download)
   - After installing, pull a model (e.g.):
+
     ```bash
     ollama pull minimax-m2.5:cloud
     ```
+
   - Make sure Ollama is running locally on port `11434`:
+
     ```bash
     ollama serve
     ```
@@ -208,6 +212,114 @@ Open [http://localhost:3000](http://localhost:3000) in your browser to view the 
 
 ---
 
+## Docker
+
+- App container (Next.js + Prisma)
+- PostgreSQL container
+- Ollama externally on your host machine
+
+### 1. Prepare Docker environment files
+
+Create both environment files used by the Docker workflow:
+
+```bash
+cp .env.example .env
+cp .env.example .env.development
+```
+
+For Docker development, keep these variables in `.env.development`:
+
+```env
+JWT_SECRET="change-this-secret"
+OLLAMA_BASE_URL="http://host.docker.internal:11434"
+OLLAMA_MODEL="minimax-m2.5:cloud"
+```
+
+`DATABASE_URL` should point to the Compose database service, for example:
+
+```env
+DATABASE_URL="postgresql://postgres:postgres@postgres:5432/heart-disease?schema=public"
+```
+
+`.env` is loaded by `docker-compose.yml` (`env_file`), and `.env.development` is used by npm Docker scripts (`--env-file`).
+
+### 2. Start Ollama on host
+
+```bash
+ollama serve
+ollama pull minimax-m2.5:cloud
+```
+
+### 3. Build and run the development stack
+
+```bash
+npm run docker:up:dev
+```
+
+The app entrypoint waits for PostgreSQL, runs `prisma migrate deploy`, then starts Next.js.
+
+### 4. Confirm containers are healthy
+
+```bash
+npm run docker:ps:dev
+npm run docker:logs:dev
+```
+
+### 5. Access services
+
+- App: `http://localhost:3000`
+- Postgres: available only inside the Compose network
+
+### 6. Stop the development stack
+
+```bash
+npm run docker:down:dev
+```
+
+### 7. Useful Docker commands (via npm scripts)
+
+```bash
+# Build development images
+npm run docker:build:dev
+
+# Start development environment (build + up)
+npm run docker:up:dev
+
+# Alias for docker:up:dev
+npm run dev:docker
+
+# View app logs
+npm run docker:logs:dev
+
+# List container status
+npm run docker:ps:dev
+
+# Stop development environment
+npm run docker:down:dev
+```
+
+These scripts use `.env.development` via `docker compose --env-file .env.development ...`.
+
+### 8. Equivalent raw Docker Compose commands
+
+```bash
+# View logs
+docker compose logs -f app
+
+# Stop stack
+docker compose down
+
+# Stop stack and remove volumes
+docker compose down -v
+```
+
+Volumes used:
+
+- `postgres_data` for PostgreSQL data
+- `app_logs` for application log files
+
+---
+
 ## Database Setup
 
 The project uses **Prisma** with **PostgreSQL**. The schema defines the following models:
@@ -239,21 +351,25 @@ npx prisma studio
 
 ## Available Scripts
 
-| Script         | Command                | Description                          |
-| -------------- | ---------------------- | ------------------------------------ |
-| `dev`          | `npm run dev`          | Start the Next.js development server |
-| `build`        | `npm run build`        | Build the production bundle          |
-| `start`        | `npm run start`        | Start the production server          |
-| `lint`         | `npm run lint`         | Run ESLint across the project        |
-| `format`       | `npm run format`       | Format all files with Prettier       |
-| `format:check` | `npm run format:check` | Check formatting without writing     |
-| `types`        | `npm run types`        | Run TypeScript type-checking         |
+- `dev` (`npm run dev`): Start the Next.js development server.
+- `dev:docker` (`npm run dev:docker`): Alias for starting Docker development environment.
+- `build` (`npm run build`): Build the production bundle.
+- `start` (`npm run start`): Start the production server.
+- `docker:build:dev` (`npm run docker:build:dev`): Build Docker images using `.env.development`.
+- `docker:up:dev` (`npm run docker:up:dev`): Start Docker development stack with rebuild.
+- `docker:down:dev` (`npm run docker:down:dev`): Stop Docker development stack.
+- `docker:logs:dev` (`npm run docker:logs:dev`): Stream app container logs in development.
+- `docker:ps:dev` (`npm run docker:ps:dev`): Show development container status.
+- `lint` (`npm run lint`): Run ESLint across the project.
+- `format` (`npm run format`): Format all files with Prettier.
+- `format:check` (`npm run format:check`): Check formatting without writing.
+- `types` (`npm run types`): Run TypeScript type-checking.
 
 ---
 
 ## Project Structure
 
-```
+```text
 heart-disease/
 ├── app/                  # Next.js App Router pages and layouts
 │   ├── (auth)/           # Authentication routes (login, register)

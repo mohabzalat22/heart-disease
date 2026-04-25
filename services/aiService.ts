@@ -99,7 +99,10 @@ export const AIService = {
           controller.close();
         } catch (error) {
           logger.error(error, 'Ollama streaming error');
-          controller.error(error);
+          const errorMessage = `data: ${JSON.stringify({ error: 'Failed to connect to Ollama. Check OLLAMA_BASE_URL and ensure Ollama is running.' })}\n\n`;
+          controller.enqueue(encoder.encode(errorMessage));
+          controller.enqueue(encoder.encode(`data: [DONE]\n\n`));
+          controller.close();
         }
       },
     });

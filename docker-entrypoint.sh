@@ -1,0 +1,34 @@
+#!/bin/sh
+set -eu
+
+DB_HOST="${DB_HOST:-postgres}"
+DB_PORT="${DB_PORT:-5432}"
+MAX_RETRIES="${DB_WAIT_MAX_RETRIES:-60}"
+SLEEP_SECONDS="${DB_WAIT_SLEEP_SECONDS:-2}"
+
+if [ -z "${DATABASE_URL:-}" ]; then
+  echo "DATABASE_URL is required"
+  exit 1
+fi
+
+if [ -z "${JWT_SECRET:-}" ]; then
+  echo "JWT_SECRET is required"
+  exit 1
+fi
+
+echo "Waiting for database at ${DB_HOST}:${DB_PORT}..."
+retries=0
+until DB_HOST="$DB_HOST" DB_PORT="$DB_PORT" node -e "const net=require('net');const s=net.createConnection({host: process.env.DB_HOST, port: Number(process.env.DB_PORT)});s.on('connect',()=>{s.end();process.exit(0)});s.on('error',()=>process.exit(1));"; do
+  retries=$((retries + 1))
+  if [ "$retries" -ge "$MAX_RETRIES" ]; then
+    echo "Database is not reachable after ${MAX_RETRIES} attempts"
+    exit 1
+  fi
+  sleep "$SLEEP_SECONDS"
+done
+
+echo "Applying Prisma migrations..."
+npx prisma migrate deploy
+
+echo "Starting Next.js server..."
+exec npm run start
