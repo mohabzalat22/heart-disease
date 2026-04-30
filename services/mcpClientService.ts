@@ -78,15 +78,15 @@ class MCPClientService {
 
     const response = (await this.client.callTool({
       name: "predict_heart_disease",
-      arguments: args as any,
-    })) as any;
+      arguments: args as unknown as Record<string, unknown>,
+    })) as { isError: boolean; content: unknown };
 
     if (response.isError) {
       throw new Error(`MCP Tool Error: ${JSON.stringify(response.content)}`);
     }
 
     // Narrow down the content type
-    const content = response.content as Array<{ type: string; text?: string; [key: string]: any }>;
+    const content = response.content as Array<{ type: string; text?: string; [key: string]: unknown }>;
     
     if (!content || content.length === 0) {
       throw new Error("MCP Tool returned empty content");
@@ -97,11 +97,11 @@ class MCPClientService {
       try {
         return JSON.parse(firstContent.text);
       } catch {
-        return firstContent.text as any;
+        return firstContent.text as unknown as PredictHeartDiseaseResponse;
       }
     }
     
-    return firstContent as any;
+    return firstContent as unknown as PredictHeartDiseaseResponse;
   }
 
   /**
