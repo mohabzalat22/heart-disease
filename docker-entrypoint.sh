@@ -30,5 +30,10 @@ done
 echo "Applying Prisma migrations..."
 npx prisma migrate deploy
 
-echo "Starting Next.js server..."
-exec npm run start
+if [ "${NODE_ENV:-production}" = "development" ]; then
+  echo "Starting Next.js in development mode..."
+  exec npm run dev
+else
+  echo "Starting Next.js in production mode..."
+  exec npm run start
+fi
