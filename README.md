@@ -22,7 +22,7 @@ A full-stack AI-powered chat application built with **Next.js**, **PostgreSQL**,
 
 ## Overview
 
-CardioAI is a Next.js web application that provides users with a chat interface powered by a locally running Ollama LLM. Users can register, log in, manage multiple chat sessions, and interact with an AI assistant trained or prompted for heart disease-related conversations.
+CardioAI is a Next.js web application that provides users with a chat interface powered by a locally running Ollama LLM. Users can register, log in, manage multiple chat sessions, and interact with an AI assistant trained or prompted for heart disease-related conversations. The app also includes MCP client support so it can discover and call tools exposed by an MCP server, including the heart disease prediction workflow.
 
 ## Features
 
@@ -37,38 +37,48 @@ CardioAI includes the following core features:
 | User Authentication      | Supports sign up, login, and protected access for personalized sessions.                                      |
 | Chat History             | Lets users create, revisit, and continue multiple chat sessions.                                              |
 | Shared Assessments       | Generates shareable assessment pages for viewing results outside the private chat view.                       |
-| Dark Mode Support        | Seamlessly switch between light and dark themes for a personalized and comfortable viewing experience.         |
+| MCP Tool Integration     | Connects to an MCP server, loads available tools into the chat context, and executes tool calls when needed.  |
+| Dark Mode Support        | Seamlessly switch between light and dark themes for a personalized and comfortable viewing experience.        |
 | Token Management         | Real-time tracking of AI token consumption with hard limits and dynamic UI balance updates.                   |
-| Motion UI                | Enhanced user experience with smooth entrance animations and micro-interactions using Framer Motion.           |
+| Motion UI                | Enhanced user experience with smooth entrance animations and micro-interactions using Framer Motion.          |
 | Settings Management      | Gives users a place to update account-related preferences and profile settings.                               |
 
 ### Admin Features
 
 The admin dashboard includes operational tools for managing the application:
 
-| Feature              | Description                                                                                |
-| -------------------- | ------------------------------------------------------------------------------------------ |
-| System Prompt Editor | Updates the default system prompt used for AI interactions, with edit and preview support.                      |
+| Feature              | Description                                                                                                    |
+| -------------------- | -------------------------------------------------------------------------------------------------------------- |
+| System Prompt Editor | Updates the default system prompt used for AI interactions, with edit and preview support.                     |
 | Log Viewer           | Monitors application logs with filtering by level and date, plus interactive metadata expansion for debugging. |
 | User Management      | Searches users, views roles and status, and activates or deactivates accounts.                                 |
+
+### MCP Integration
+
+CardioAI uses the Model Context Protocol in two ways:
+
+- **MCP client**: `services/mcpClientService.ts` connects to an MCP server over SSE and loads the available tool list at runtime.
+- **MCP tool execution**: `services/aiService.ts` injects MCP tools into the AI chat loop and can execute tool calls returned by the model.
+- **Prediction tool**: the app calls the `predict_heart_disease` MCP tool for clinical risk prediction flows.
 
 ---
 
 ## Tech Stack
 
-| Layer         | Technology                       |
-| ------------- | -------------------------------- |
-| Framework     | Next.js 16 (App Router)          |
-| Language      | TypeScript                       |
-| Styling       | Tailwind CSS v4                  |
-| UI Components | Shadcn/UI + Radix UI             |
-| Database      | PostgreSQL                       |
-| ORM           | Prisma v7                        |
-| AI / LLM      | Ollama (local inference)         |
-| Animation     | Framer Motion                    |
-| Theme         | next-themes                      |
-| Auth          | JWT via `jose` + bcrypt          |
-| Forms         | React Hook Form + Zod validation |
+| Layer         | Technology                                          |
+| ------------- | --------------------------------------------------- |
+| Framework     | Next.js 16 (App Router)                             |
+| Language      | TypeScript                                          |
+| Styling       | Tailwind CSS v4                                     |
+| UI Components | Shadcn/UI + Radix UI                                |
+| Database      | PostgreSQL                                          |
+| ORM           | Prisma v7                                           |
+| AI / LLM      | Ollama (local inference)                            |
+| MCP           | Model Context Protocol tools via an external server |
+| Animation     | Framer Motion                                       |
+| Theme         | next-themes                                         |
+| Auth          | JWT via `jose` + bcrypt                             |
+| Forms         | React Hook Form + Zod validation                    |
 
 ---
 
@@ -160,6 +170,9 @@ JWT_SECRET="your-super-secret-jwt-key"
 
 # Ollama base URL (default local port)
 OLLAMA_BASE_URL="http://127.0.0.1:11434"
+
+# MCP server base URL used by the app's MCP client
+MCP_SERVER_URL="http://localhost:5000"
 ```
 
 > **⚠️ Security Warning**: Never commit your `.env` file to version control. It is already listed in `.gitignore`.
@@ -212,7 +225,13 @@ ollama serve         # Start the Ollama server
 ollama pull minimax-m2.5:cloud   # Pull the model the app uses (adjust as needed)
 ```
 
-### 6. Run the Development Server
+### 6. Start the MCP Server
+
+If you want the chat assistant to discover and call MCP tools, make sure the MCP server is running and reachable at `MCP_SERVER_URL`.
+
+The app expects the server to expose an SSE endpoint at `/sse` and to provide the `predict_heart_disease` tool used by the prediction flow.
+
+### 7. Run the Development Server
 
 ```bash
 npm run dev
@@ -340,6 +359,8 @@ The project uses **Prisma** with **PostgreSQL**. The schema defines the followin
 | `Chat`    | Represents a chat session belonging to a user    |
 | `Message` | Individual messages within a chat (user or AI)   |
 | `Prompt`  | System prompt configuration per user             |
+
+The AI layer also integrates with an external MCP server for tool discovery and execution.
 
 ### Useful Prisma Commands
 
