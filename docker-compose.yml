@@ -4,7 +4,7 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        DATABASE_URL: ${DATABASE_URL}
+        DATABASE_URL: ${DATABASE_URL:-"postgresql://postgres:postgres@postgres:5432/heart-disease?schema=public"}
     container_name: cardioai-app
     restart: unless-stopped
     env_file:
@@ -13,7 +13,7 @@ services:
       NODE_ENV: ${NODE_ENV:-production}
       DB_HOST: postgres
       DB_PORT: 5432
-      DATABASE_URL: ${DATABASE_URL}
+      DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres@postgres:5432/heart-disease?schema=public}
       OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
       OLLAMA_MODEL: ${OLLAMA_MODEL:-minimax-m2.5:cloud}
     extra_hosts:
@@ -41,10 +41,10 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        DATABASE_URL: ${DATABASE_URL}
+        DATABASE_URL: ${DATABASE_URL:-"postgresql://postgres:postgres@postgres:5432/heart-disease?schema=public"}
     container_name: cardioai-studio
     environment:
-      DATABASE_URL: ${DATABASE_URL}
+      DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres@postgres:5432/heart-disease?schema=public}
       DB_HOST: postgres
       DB_PORT: 5432
     depends_on:

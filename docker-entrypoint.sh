@@ -7,8 +7,10 @@ MAX_RETRIES="${DB_WAIT_MAX_RETRIES:-60}"
 SLEEP_SECONDS="${DB_WAIT_SLEEP_SECONDS:-2}"
 
 if [ -z "${DATABASE_URL:-}" ]; then
-  echo "DATABASE_URL is required"
-  exit 1
+  # Fallback to the Compose postgres service if no DATABASE_URL provided
+  DATABASE_URL="postgresql://postgres:postgres@postgres:5432/heart-disease?schema=public"
+  export DATABASE_URL
+  echo "No DATABASE_URL provided — falling back to ${DATABASE_URL}"
 fi
 
 if [ -z "${JWT_SECRET:-}" ]; then
