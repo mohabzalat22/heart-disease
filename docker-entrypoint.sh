@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 set -eu
 
 DB_HOST="${DB_HOST:-postgres}"
