@@ -194,17 +194,25 @@ cd heart-disease
 npm install
 ```
 
-### 3. Configure Environment Variables
+### 3. Copy Environment Files
 
-Copy the example below into a new `.env` file and fill in your values:
+Create the environment files used for local and Docker development:
 
 ```bash
 cp .env.example .env
+cp .env.example .env.development
 ```
 
-Then edit `.env` with your PostgreSQL credentials and desired JWT secret.
+Then update the values as needed:
 
-### 4. Set Up the Database
+- `.env` for your local app/database settings.
+- `.env.development` for Docker-oriented settings (for example `host.docker.internal` for Ollama).
+
+### 4. Set Up Environment Variables
+
+Edit `.env` with your PostgreSQL credentials and desired JWT secret.
+
+### 5. Set Up the Database
 
 Make sure PostgreSQL is running, then run:
 
@@ -216,7 +224,7 @@ npx prisma migrate deploy
 npx prisma generate
 ```
 
-### 5. Start Ollama
+### 6. Start Ollama
 
 Ensure Ollama is running and a model is available:
 
@@ -225,13 +233,13 @@ ollama serve         # Start the Ollama server
 ollama pull minimax-m2.5:cloud   # Pull the model the app uses (adjust as needed)
 ```
 
-### 6. Start the MCP Server
+### 7. Start the MCP Server
 
 If you want the chat assistant to discover and call MCP tools, make sure the MCP server is running and reachable at `MCP_SERVER_URL`.
 
 The app expects the server to expose an SSE endpoint at `/sse` and to provide the `predict_heart_disease` tool used by the prediction flow.
 
-### 7. Run the Development Server
+### 8. Run the Development Server
 
 ```bash
 npm run dev
