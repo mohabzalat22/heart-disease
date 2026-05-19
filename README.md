@@ -7,6 +7,7 @@ A full-stack AI-powered chat application built with **Next.js**, **PostgreSQL**,
 ## 📋 Table of Contents
 
 - [Overview](#overview)
+- [System Diagrams & Architecture](docs/diagrams.md)
 - [Features](#features)
 - [Tech Stack](#tech-stack)
 - [Prerequisites](#prerequisites)
@@ -23,6 +24,23 @@ A full-stack AI-powered chat application built with **Next.js**, **PostgreSQL**,
 ## Overview
 
 CardioAI is a Next.js web application that provides users with a chat interface powered by a locally running Ollama LLM. Users can register, log in, manage multiple chat sessions, and interact with an AI assistant trained or prompted for heart disease-related conversations. The app also includes MCP client support so it can discover and call tools exposed by an MCP server, including the heart disease prediction workflow.
+
+---
+
+## 📊 System Diagrams & Architecture
+
+To help visualize and understand the internal structure, dynamic data flows, database schemas, and operational boundaries of the CardioAI platform, a set of 5 professional systems engineering diagrams has been compiled:
+
+👉 **[View Interactive System Diagrams (docs/diagrams.md)](docs/diagrams.md)**
+
+### Diagram Quick Links:
+1. [**System Architecture Diagram**](docs/diagrams.md#1-system-architecture-diagram) — Visualizes the multi-tier (Client, API, Services, Repositories, DB, and External Engines) structure.
+2. [**Database ER Diagram**](docs/diagrams.md#2-database-er-diagram) — Represents tables, primary/foreign keys, attributes, and relationships.
+3. [**Sequence Diagram**](docs/diagrams.md#3-sequence-diagram) — Explains the dynamic call flow for an authorized heart risk assessment chat query involving Ollama LLM and the external MCP server.
+4. [**Use Case Diagram**](docs/diagrams.md#4-use-case-diagram) — Describes user and administrative roles and their interaction with system services.
+5. [**DFD Level 0 (Context Diagram)**](docs/diagrams.md#5-dfd-level-0-context-diagram) — Outlines the platform's boundaries, entities, and primary data transformations.
+
+---
 
 ## Features
 
