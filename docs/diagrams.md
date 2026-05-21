@@ -5,6 +5,7 @@ This document contains high-fidelity Mermaid diagrams detailing the architectura
 ---
 
 ## 📋 Table of Contents
+
 1. [System Architecture Diagram](#1-system-architecture-diagram)
 2. [Database ER Diagram](#2-database-er-diagram)
 3. [Sequence Diagram](#3-sequence-diagram)
@@ -28,7 +29,7 @@ flowchart TB
     subgraph Server ["Application & API Layer (Next.js Node.js Server)"]
         API["API Route Handlers<br/>(/api/chat, /api/auth)"]
         Actions["Server Actions<br/>(Settings & Admin configuration)"]
-        
+
         subgraph Services ["Business Logic Services"]
             AI["aiService.ts<br/>(Ollama & Prompt Orchestration)"]
             MCP["mcpClientService.ts<br/>(SSE Tool Invoker)"]
@@ -65,7 +66,7 @@ flowchart TB
     API --> AS
     Actions --> CS
     Actions --> AS
-    
+
     AI --> MCP
     AI --> UR
     AI --> MR
@@ -91,7 +92,7 @@ flowchart TB
     classDef services fill:#fff3e0,stroke:#ffb74d,stroke-width:2px;
     classDef data fill:#e8f5e9,stroke:#81c784,stroke-width:2px;
     classDef infra fill:#eceff1,stroke:#90a4ae,stroke-width:2px;
-    
+
     class UI,ChatUI,Store client;
     class API,Actions server;
     class AI,MCP,CS,AS services;
@@ -173,56 +174,56 @@ sequenceDiagram
 
     User->>FE: Input health metrics & message
     FE->>API: HTTP POST /api/chat (Message, Chat Token, JWT Cookie)
-    
+
     activate API
     API->>DB: Verify JWT and retrieve User Session
     DB-->>API: User details (Active status, Role, Tokens)
-    
+
     alt User is inactive or has insufficient tokens
         API-->>FE: HTTP 403 Forbidden / 402 Payment Required
         FE-->>User: Show system warning message
     else User is authorized
         API->>DB: Fetch SystemConfig (Default prompt) & User Custom Prompt
         DB-->>API: Active System Prompt
-        
+
         API->>AI: sendMessage(chatHistory, userMessage, systemPrompt)
         activate AI
-        
+
         AI->>MCP: getAvailableTools()
         activate MCP
         MCP->>MCPS: GET/SSE Handshake / Fetch Tool Definitions
         MCPS-->>MCP: Tool list (predict_heart_disease)
         MCP-->>AI: Register tool definitions in model context
         deactivate MCP
-        
+
         AI->>LLM: POST /api/chat (History + System Prompt + Tools)
         activate LLM
         Note over LLM: Model processes request,<br/>recognizes clinical health data,<br/>and triggers tool prediction flow
         LLM-->>AI: Tool Call Request (predict_heart_disease with arguments)
         deactivate LLM
-        
+
         AI->>MCP: executeTool("predict_heart_disease", args)
         activate MCP
         MCP->>MCPS: POST /tools/call (predict_heart_disease, args)
         MCPS-->>MCP: Prediction Result (e.g., riskScore: 78%, highRisk: true)
         MCP-->>AI: Return structured JSON results
         deactivate MCP
-        
+
         AI->>LLM: POST /api/chat (Provide Tool Result back to LLM)
         activate LLM
         Note over LLM: Formulate conversational response<br/>explaining the risk percentage & recommendations
         LLM-->>AI: Final conversational assistant response
         deactivate LLM
-        
+
         AI->>DB: Deduct computed token count from User's balance
         AI->>DB: Save User & Assistant messages to Message table
-        
+
         AI-->>API: Return final response & token metadata
         deactivate AI
-        
+
         API-->>FE: HTTP 200 OK (Response JSON + remaining tokens)
         deactivate API
-        
+
         FE->>FE: Update store state & trigger entrance transitions
         FE-->>User: Display AI response & updated token count
     end
@@ -298,7 +299,7 @@ flowchart LR
 ---
 
 ## 5. DFD Level 0 — Context Diagram
- 
+
 The Data Flow Diagram (DFD) Level 0 illustrates the boundary of the **CardioAI** platform, depicting a unified central system process interacting cleanly with human actors and external intelligent services.
 
 ```mermaid
@@ -319,26 +320,26 @@ flowchart LR
     end
 
     %% Data flows - User & System
-    User -->|Auth credentials & health queries| System
-    System -->|AI responses & risk reports| User
+    User -->|Auth credentials | System
+    System -->|AI responses | User
 
     %% Data flows - Admin & System
-    Admin -->|Prompt configurations & state controls| System
+    Admin -->|Prompt configurations | System
     System -->|System logs & user accounts| Admin
 
     %% Data flows - System & Ollama LLM
     System -->|Chat history & tool schemas| Ollama
-    Ollama -->|Conversational responses & tool calls| System
+    Ollama -->|Responses & tool calls| System
 
     %% Data flows - System & MCP Server
     System -->|Clinical health arguments| MCP
-    MCP -->|Heart disease predictions & recommendations| System
+    MCP -->|Heart disease predictions | System
 
     %% Styling & Aesthetics
     classDef human fill:#f0f9ff,stroke:#0ea5e9,stroke-width:2px,color:#0369a1;
     classDef process fill:#fff7ed,stroke:#f97316,stroke-width:3px,color:#9a3412;
     classDef external fill:#f0fdf4,stroke:#22c55e,stroke-width:2px,color:#166534;
-    
+
     class User,Admin human;
     class System process;
     class Ollama,MCP external;
