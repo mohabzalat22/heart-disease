@@ -559,12 +559,10 @@ flowchart TD
     MCPEval --> ReturnResult[Append JSON prediction to context history]
     ReturnResult --> ModelCall
 
-    ToolDecision -- No --> GenerateResp[Synthesize Final Assistant Response]
-
-    GenerateResp --> LedgerSync[Deduct Evaluated Tokens from User Balance]
-    LedgerSync --> SaveMsg[Store Assistant Message in Postgres DB]
+    ToolDecision -- No --> LedgerSync[Deduct Evaluated Tokens from User Balance]
     SaveMsg --> StreamOutput[Stream SSE Assistant Response to Client]
     StreamOutput --> Display[Display Assistant Response & Metrics to User]
+    LedgerSync --> SaveMsg[Store Assistant Message in Postgres DB]
     Display --> End
 
     %% Styling & Aesthetics
