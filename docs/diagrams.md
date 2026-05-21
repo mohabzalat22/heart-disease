@@ -11,6 +11,9 @@ This document contains high-fidelity Mermaid diagrams detailing the architectura
 3. [Sequence Diagram](#3-sequence-diagram)
 4. [Use Case Diagram](#4-use-case-diagram)
 5. [DFD Level 0 — Context Diagram](#5-dfd-level-0-context-diagram)
+6. [Class Diagram](#6-class-diagram)
+7. [System Integration & Prediction Methodology](#7-system-integration-prediction-methodology)
+8. [UML Activity Diagram — Dynamic Token Auditing & num_predict](#8-uml-activity-diagram--dynamic-token-auditing--num_predict-generation-limits)
 
 ---
 
@@ -23,6 +26,7 @@ flowchart TB
     subgraph Client ["Presentation Layer (Next.js Client)"]
         UI["Next.js Pages & App Router Layouts<br/>(Tailwind CSS v4 + next-themes)"]
         ChatUI["Chat Interface Component<br/>(Framer Motion + Lucide React)"]
+        AdminUI["Admin Dashboard UI<br/>(Log viewer, User toggler, Prompt editor)"]
         Store["Client State Store<br/>(React Hooks & Context)"]
     end
 
@@ -58,6 +62,7 @@ flowchart TB
     %% Component Interconnections
     UI --> API
     UI --> Actions
+    AdminUI --> Actions
     ChatUI --> UI
     Store --> UI
 
@@ -93,7 +98,7 @@ flowchart TB
     classDef data fill:#e8f5e9,stroke:#81c784,stroke-width:2px;
     classDef infra fill:#eceff1,stroke:#90a4ae,stroke-width:2px;
 
-    class UI,ChatUI,Store client;
+    class UI,ChatUI,AdminUI,Store client;
     class API,Actions server;
     class AI,MCP,CS,AS services;
     class Prisma,UR,CR,MR,PR,SR data;
@@ -346,4 +351,232 @@ flowchart LR
 
     style HumanActors fill:#f8fafc,stroke:#e2e8f0,stroke-width:1.5px,stroke-dasharray: 4 4;
     style Services fill:#f8fafc,stroke:#e2e8f0,stroke-width:1.5px,stroke-dasharray: 4 4;
+```
+
+---
+
+## 6. Class Diagram
+
+This UML Class Diagram represents the structural blueprint of the **CardioAI** platform, depicting the Psuedo object-oriented structure, repositories, business logic services, methods, and relationships.
+
+```mermaid
+classDiagram
+    direction TB
+
+    class AuthService {
+        +signUp(data: SignUpData) static
+        +signIn(data: SignInData) static
+    }
+
+    class AIService {
+        +respond(chatId: number, userId: number) static
+        +saveResponse(chatId: number, message: string) static
+    }
+
+    class MCPClientService {
+        -instance: MCPClientService static
+        -getClient() Client
+        +getInstance() MCPClientService static
+        +connect() void
+        +listTools() Promise
+        +predictHeartDisease(args: PredictHeartDiseaseArgs) Promise
+        +callTool(name: string, args: Record) Promise
+    }
+
+    class ChatService {
+        +create(data: CreateChat) static
+        +getAll(userId: number) static
+        +getById(id: number) static
+        +getByToken(token: string) static
+        +update(id: number, data: Partial) static
+        +deleteById(id: number) static
+        +deleteByToken(token: string) static
+    }
+
+    class MessageService {
+        +create(data: CreateMessage) static
+        +getAll(chatId: number) static
+        +getById(id: number) static
+        +update(id: number, data: Partial) static
+        +deleteById(id: number) static
+    }
+
+    class AdminActions {
+        -checkAdmin() Promise
+        +updateGlobalPrompt(prompt: string) Promise
+        +getGlobalPrompt() Promise
+        +getLogs(page: number, pageSize: number, level: string, date: string) Promise
+        +getAllUsers() Promise
+        +toggleUserStatus(userId: number, isActive: boolean) Promise
+        +updateUserTokens(userId: number, tokens: number) Promise
+    }
+
+    class UserRepo {
+        +findByEmail(email: string) static
+        +findById(id: number) static
+        +createUser(data: UserCreateInput) static
+        +updateUser(id: number, data: UserUpdateInput) static
+        +findAll() static
+        +updateStatus(id: number, isActive: boolean) static
+        +checkTokenBalance(userId: number) static
+        +deductTokens(userId: number, amount: number) static
+        +setTokens(id: number, tokens: number) static
+        +refundChatToken(userId: number) static
+    }
+
+    class ChatRepository {
+        +create(data: CreateChat) static
+        +getAll(userId: number) static
+        +getById(id: number) static
+        +getByToken(token: string) static
+        +update(id: number, data: Partial) static
+        +deleteById(id: number) static
+        +deleteByToken(token: string) static
+    }
+
+    class MessageRepository {
+        +create(data: CreateMessage) static
+        +getAll(chatId: number) static
+        +getById(id: number) static
+        +update(id: number, data: Partial) static
+        +deleteById(id: number) static
+    }
+
+    class PromptRepo {
+        +findByUserId(userId: number) static
+        +upsertPrompt(userId: number, prompt: string) static
+    }
+
+    class SystemRepo {
+        +getDefaultPrompt() static
+        +updateDefaultPrompt(prompt: string) static
+    }
+
+    %% Relationships
+    AuthService ..> UserRepo : "authenticates via"
+    AIService ..> MessageService : "reads/saves messages via"
+    AIService ..> UserRepo : "checks/deducts tokens via"
+    AIService ..> MCPClientService : "lists/calls tools via"
+    ChatService ..> ChatRepository : "delegates DB ops"
+    MessageService ..> MessageRepository : "delegates DB ops"
+    AdminActions ..> UserRepo : "manages users/roles via"
+    AdminActions ..> SystemRepo : "configures global default prompt via"
+
+    %% Styling
+    style AuthService fill:#e0f7fa,stroke:#00acc1,stroke-width:1.5px
+    style AIService fill:#e0f7fa,stroke:#00acc1,stroke-width:1.5px
+    style MCPClientService fill:#e0f7fa,stroke:#00acc1,stroke-width:1.5px
+    style ChatService fill:#e0f7fa,stroke:#00acc1,stroke-width:1.5px
+    style MessageService fill:#e0f7fa,stroke:#00acc1,stroke-width:1.5px
+    style AdminActions fill:#efebe9,stroke:#8d6e63,stroke-width:1.5px
+
+    style UserRepo fill:#e8f5e9,stroke:#81c784,stroke-width:1.5px
+    style ChatRepository fill:#e8f5e9,stroke:#81c784,stroke-width:1.5px
+    style MessageRepository fill:#e8f5e9,stroke:#81c784,stroke-width:1.5px
+    style PromptRepo fill:#e8f5e9,stroke:#81c784,stroke-width:1.5px
+    style SystemRepo fill:#e8f5e9,stroke:#81c784,stroke-width:1.5px
+```
+
+---
+
+## 7. System Integration & Prediction Methodology
+
+The CardioAI methodology utilizes a high-performance orchestration system that integrates local Large Language Models (LLMs) with standard clinical APIs. Below is the workflow detailing how raw chat conversations are dynamically enriched with structured medical inference.
+
+### Technical Principles & Pipelines
+
+1. **Information Ingestion & Sanitization**: Patient messages are streamed via Next.js routes. System filters custom settings & prompts to format context.
+2. **Dynamic Tool Schema Injections**: The Model Context Protocol (MCP) server dynamically presents capabilities (like `predict_heart_disease`) to the LLM agent container using Server-Sent Events (SSE).
+3. **Agentic Inference**: The local LLM processes conversation history. When structured clinical variables are detected in natural language, it executes the predictive tool model.
+4. **PostgreSQL Ledger Auditing**: For each completed LLM iteration, prompt and completion tokens are measured and deducted from the patient's quota in real-time, providing strict rate limiting and monetization guardrails.
+
+```mermaid
+flowchart TD
+    subgraph Input ["1. Patient Input Layer"]
+        A["Unstructured User Chat Input<br/>(User Message)"] --> B["Health Metrics Extraction<br/>(NLP Processing via LLM)"]
+    end
+
+    subgraph Orchestration ["2. AI & Orchestration Layer"]
+        B --> C["Prompt Assembly<br/>(Global System + User Custom Override)"]
+        C --> D["Context Initialization<br/>(Load Chat History + Register MCP Schemas)"]
+        D --> E{"LLM Intent Analysis<br/>(Ollama Inference)"}
+    end
+
+    subgraph ToolExecution ["3. Clinical Execution Layer (MCP)"]
+        E -- "Clinical Data Found" --> F["Tool Request<br/>(predict_heart_disease)"]
+        F --> G["SSE Transport handshake"]
+        G --> H["CardioAI ML Inference<br/>(Risk & Prediction Calculation)"]
+        H --> I["Structured Prediction Output<br/>(JSON Data)"]
+    end
+
+    subgraph OutputGeneration ["4. Response Synthesis & Ledger"]
+        I --> J["Synthesize Assistant Explanation<br/>(Assistant Response)"]
+        E -- "Casual Chat/No Metrics" --> J
+        J --> K["Token Deductions & Audit Log<br/>(Database Ledger Sync)"]
+        K --> L["Final SSE Stream Render<br/>(Assistant Response to client)"]
+    end
+
+    %% Styles
+    classDef input fill:#eef2f6,stroke:#cbd5e1,stroke-width:2px;
+    classDef orch fill:#fffbeb,stroke:#fef08a,stroke-width:2px;
+    classDef tool fill:#f0fdf4,stroke:#bbf7d0,stroke-width:2px;
+    classDef output fill:#fef2f2,stroke:#fecaca,stroke-width:2px;
+
+    class A,B input;
+    class C,D,E orch;
+    class F,G,H,I tool;
+    class J,K,L output;
+```
+
+---
+
+## 8. UML Activity Diagram — Dynamic Token Auditing & num_predict (Generation Limits)
+
+This diagram displays the dynamic operational sequence of activities within the CardioAI application, representing actions, decisions, and system forks from user login to final stream response generation.
+
+```mermaid
+flowchart TD
+    %% Define nodes and flow
+    Start([● Start]) --> AuthCheck{Is User<br/>Authenticated?}
+
+    AuthCheck -- No --> SignUp[Register / Log In] --> AuthCheck
+    AuthCheck -- Yes --> Session[Initialize/Select Chat Session]
+
+    Session --> InputMsg[User enters message / clinical details]
+    InputMsg --> CheckTokens{Check Token Balance}
+
+    CheckTokens -- Insufficient (<= 0) --> Reject[Display Token Quota Error]
+    Reject --> End([● End])
+
+    CheckTokens -- Sufficient (> 0) --> PromptComp[Assemble Global & Custom Prompts]
+    PromptComp --> EvalTokens[Estimate Prompt Tokens & Set num_predict Limit]
+    EvalTokens --> ModelCall[Query Ollama LLM via AIService]
+
+    ModelCall --> ToolDecision{Does LLM request<br/>Tool Execution?}
+
+    ToolDecision -- Yes --> CallTool[Invoke predict_heart_disease tool]
+    CallTool --> MCPEval[Execute prediction logic on MCP Server]
+    MCPEval --> ReturnResult[Append JSON prediction to context history]
+    ReturnResult --> ModelCall
+
+    ToolDecision -- No --> GenerateResp[Synthesize Final Assistant Response]
+
+    GenerateResp --> LedgerSync[Deduct Evaluated Tokens from User Balance]
+    LedgerSync --> SaveMsg[Store Assistant Message in Postgres DB]
+    SaveMsg --> StreamOutput[Stream SSE Assistant Response to Client]
+    StreamOutput --> Display[Display Assistant Response & Metrics to User]
+    Display --> End
+
+    %% Styling & Aesthetics
+    classDef startEnd fill:#f8fafc,stroke:#94a3b8,stroke-width:2px,color:#334155;
+    classDef action fill:#f0f9ff,stroke:#0ea5e9,stroke-width:2px,color:#0369a1;
+    classDef decision fill:#fff7ed,stroke:#f97316,stroke-width:2px,color:#9a3412;
+    classDef error fill:#fef2f2,stroke:#ef4444,stroke-width:2px,color:#991b1b;
+    classDef mcp fill:#f0fdf4,stroke:#22c55e,stroke-width:2px,color:#166534;
+
+    class Start,End startEnd;
+    class SignUp,Session,InputMsg,PromptComp,EvalTokens,ModelCall,GenerateResp,LedgerSync,SaveMsg,StreamOutput,Display action;
+    class AuthCheck,CheckTokens,ToolDecision decision;
+    class Reject error;
+    class CallTool,MCPEval,ReturnResult mcp;
 ```
