@@ -45,3 +45,6 @@ next-env.d.ts
 
 # logs
 /logs/*
+
+# Force consistent line endings across all environments
+* text=auto eol=lf
