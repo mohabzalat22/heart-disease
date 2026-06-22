@@ -7,13 +7,7 @@ import { UserRepo } from '@/repositories/userRepo';
 import { mcpClientService } from './mcpClientService';
 
 export const AIService = {
-  /**
-   * Generate a streaming response from Ollama based on chat context
-   * @param chatId - The chat ID to get message context from
-   * @returns ReadableStream with Ollama response
-   */
   respond: async (chatId: number, userId: number) => {
-    // Get all messages from specific chat for context
     const messages = await MessageService.getAll(chatId);
 
     if (!messages) {
@@ -33,37 +27,71 @@ export const AIService = {
       .join('\n\n');
 
     const userBalance = await UserRepo.checkTokenBalance(userId);
+
     let numPredict: number | undefined;
+
     if (userBalance.allowed && userBalance.remaining !== null) {
-      const promptText = [systemPrompt, ...messages.map((m: Message) => m.message)].filter(Boolean).join(' ');
+      const promptText = [
+        systemPrompt,
+        ...messages.map((m: Message) => m.message),
+      ]
+        .filter(Boolean)
+        .join(' ');
       const estimatedPromptTokens = Math.ceil(promptText.length / 4);
       numPredict = Math.max(1, userBalance.remaining - estimatedPromptTokens);
     }
 
-    // Create a ReadableStream that streams Ollama response in SSE format
-    const stream = new ReadableStream({
+    return new ReadableStream({
       async start(controller) {
         const encoder = new TextEncoder();
+        let closed = false;
+
+        const safeEnqueue = (data: string) => {
+          if (closed) return;
+          try {
+            controller.enqueue(encoder.encode(data));
+          } catch {
+            closed = true;
+          }
+        };
+
+        const safeClose = () => {
+          if (closed) return;
+          closed = true;
+          try {
+            controller.close();
+          } catch {}
+        };
 
         try {
-          // Fetch tools from MCP server
+          // Fetch MCP tools
           let tools: Record<string, unknown>[] = [];
+
           try {
             const mcpTools = await mcpClientService.listTools();
-            tools = mcpTools.tools.map((t: { name: string; description?: string; inputSchema: unknown }) => ({
-              type: 'function',
-              function: {
-                name: t.name,
-                description: t.description,
-                parameters: t.inputSchema,
-              },
-            }));
+
+            tools = mcpTools.tools.map(
+              (t: {
+                name: string;
+                description?: string;
+                inputSchema: unknown;
+              }) => ({
+                type: 'function',
+                function: {
+                  name: t.name,
+                  description: t.description,
+                  parameters: t.inputSchema,
+                },
+              })
+            );
           } catch (mcpError) {
-            console.error('Failed to fetch MCP tools for AI context:', mcpError);
+            console.error('Failed to fetch MCP tools:', mcpError);
           }
 
           const currentMessages: Record<string, unknown>[] = [
-            ...(systemPrompt ? [{ role: 'system', content: systemPrompt }] : []),
+            ...(systemPrompt
+              ? [{ role: 'system', content: systemPrompt }]
+              : []),
             ...messages.map((m: Message) => ({
               role: m.actor === Actor.USER ? 'user' : 'assistant',
               content: m.message,
@@ -72,7 +100,7 @@ export const AIService = {
 
           let maxIterations = 5;
 
-          while (maxIterations-- > 0) {
+          while (maxIterations-- > 0 && !closed) {
             const bodyPayload: Record<string, unknown> = {
               model: process.env.OLLAMA_MODEL || 'minimax-m2.5:cloud',
               messages: currentMessages,
@@ -87,131 +115,148 @@ export const AIService = {
               bodyPayload.options = { num_predict: numPredict };
             }
 
-            const response = await fetch(`${process.env.OLLAMA_BASE_URL}/api/chat`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(bodyPayload),
-            });
+            const response = await fetch(
+              `${process.env.OLLAMA_BASE_URL}/api/chat`,
+              {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(bodyPayload),
+              }
+            );
 
             if (!response.ok || !response.body) {
-              throw new Error(`Cannot establish a connection to Ollama on ${process.env.OLLAMA_BASE_URL}.`);
+              throw new Error(
+                `Cannot connect to Ollama at ${process.env.OLLAMA_BASE_URL}`
+              );
             }
 
             const reader = response.body.getReader();
             const decoder = new TextDecoder();
+
             let buffer = '';
             let currentIterationContent = '';
-            const toolCalls: { id: string; type: string; function: { name: string; arguments: Record<string, unknown> } }[] = [];
+            const toolCalls: any[] = [];
 
-            while (true) {
+            while (!closed) {
               const { done, value } = await reader.read();
               if (done) break;
 
               buffer += decoder.decode(value, { stream: true });
+
               const lines = buffer.split('\n');
               buffer = lines.pop() || '';
 
               for (const line of lines) {
-                if (line.trim() === '') continue;
+                if (!line.trim()) continue;
 
                 try {
                   const parsed = JSON.parse(line);
-                  
-                  // Handle regular content
+
                   if (parsed.message?.content) {
                     currentIterationContent += parsed.message.content;
-                    const sseMessage = `data: ${JSON.stringify({ content: parsed.message.content })}\n\n`;
-                    controller.enqueue(encoder.encode(sseMessage));
+
+                    safeEnqueue(
+                      `data: ${JSON.stringify({
+                        content: parsed.message.content,
+                      })}\n\n`
+                    );
                   }
 
-                  // Handle tool calls
                   if (parsed.message?.tool_calls) {
                     toolCalls.push(...parsed.message.tool_calls);
                   }
 
                   if (parsed.done) {
-                    const totalTokens = (parsed.prompt_eval_count || 0) + (parsed.eval_count || 0);
+                    const totalTokens =
+                      (parsed.prompt_eval_count || 0) +
+                      (parsed.eval_count || 0);
+
                     if (totalTokens > 0) {
                       await UserRepo.deductTokens(userId, totalTokens);
-                      controller.enqueue(encoder.encode(`data: ${JSON.stringify({ usage: { totalTokens } })}\n\n`));
+
+                      safeEnqueue(
+                        `data: ${JSON.stringify({
+                          usage: { totalTokens },
+                        })}\n\n`
+                      );
                     }
                   }
                 } catch (e) {
-                  console.error('Ollama streaming error:', e);
+                  console.error('Ollama parse error:', e);
                 }
               }
             }
 
-            if (toolCalls.length > 0) {
-              // Add the assistant's message with tool calls to the history
+            // Tool calling loop
+            if (toolCalls.length > 0 && !closed) {
               currentMessages.push({
                 role: 'assistant',
                 content: currentIterationContent,
                 tool_calls: toolCalls,
-              } as Record<string, unknown>);
+              } as any);
 
-              // Execute tool calls
               for (const toolCall of toolCalls) {
+                if (closed) break;
+
                 const name = toolCall.function.name;
                 const args = toolCall.function.arguments;
 
-                console.log(`🛠️ Executing MCP tool: ${name}`, args);
-                
-                // Show a status update in the chat
-                controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content: `\n\n*System: Executing tool ${name}...*\n\n` })}\n\n`));
+                safeEnqueue(
+                  `data: ${JSON.stringify({
+                    content: `\n\n*System: Executing tool ${name}...*\n\n`,
+                  })}\n\n`
+                );
 
                 try {
                   const result = await mcpClientService.callTool(name, args);
-                  const resultString = JSON.stringify(result);
-                  
+
                   currentMessages.push({
                     role: 'tool',
-                    content: resultString,
+                    content: JSON.stringify(result),
                     tool_call_id: toolCall.id,
-                  } as Record<string, unknown>);
+                  } as any);
                 } catch (toolError) {
-                  console.error(`Error executing tool ${name}:`, toolError);
                   currentMessages.push({
                     role: 'tool',
-                    content: `Error: ${toolError instanceof Error ? toolError.message : String(toolError)}`,
+                    content: `Error: ${
+                      toolError instanceof Error
+                        ? toolError.message
+                        : String(toolError)
+                    }`,
                     tool_call_id: toolCall.id,
-                  } as Record<string, unknown>);
+                  } as any);
                 }
               }
-              // Loop continues to get the model's reaction to tool results
+
               continue;
-            } else {
-              // No more tool calls, we're done
-              break;
             }
+
+            break;
           }
 
-          controller.enqueue(encoder.encode(`data: [DONE]\n\n`));
-          controller.close();
+          safeEnqueue(`data: [DONE]\n\n`);
+          safeClose();
         } catch (error) {
           logger.error(error, 'Ollama streaming error');
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: 'Failed to connect to Ollama. Check OLLAMA_BASE_URL and ensure Ollama is running.' })}\n\n`));
-          controller.enqueue(encoder.encode(`data: [DONE]\n\n`));
-          controller.close();
+
+          safeEnqueue(
+            `data: ${JSON.stringify({
+              error: 'Failed to connect to Ollama. Check OLLAMA_BASE_URL.',
+            })}\n\n`
+          );
+
+          safeEnqueue(`data: [DONE]\n\n`);
+          safeClose();
         }
       },
     });
-
-    return stream;
   },
 
-  /**
-   * Save the complete AI response to the database
-   * @param chatId - The chat ID to save the message to
-   * @param message - The complete AI response message
-   */
   saveResponse: async (chatId: number, message: string) => {
-    const messageData = {
+    return MessageService.create({
       chatId,
       actor: Actor.ASSISTANT,
       message,
-    };
-
-    return await MessageService.create(messageData);
+    });
   },
 };

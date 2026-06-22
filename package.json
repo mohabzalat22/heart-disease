@@ -6,11 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "docker:build:prod": "docker compose build",
-    "docker:up:prod": "docker compose up -d",
-    "docker:down:prod": "docker compose down",
-    "docker:logs:prod": "docker compose logs -f app",
-    "docker:build:dev": "docker compose --profile tools --env-file .env.development build",
+    "docker:make:admin:dev": "docker compose exec app npx tsx scripts/make-admin.ts",
+    "docker:build:dev": "docker compose --profile tools --env-file .env.development build --no-cache",
     "docker:watch:dev": "NODE_ENV=development docker compose --profile tools --env-file .env.development up --watch",
     "docker:up:dev": "NODE_ENV=development docker compose --profile tools --env-file .env.development up --build app postgres studio",
     "docker:down:dev": "docker compose --profile tools --env-file .env.development down",
@@ -21,7 +18,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "types": "tsc --project tsconfig.json --noEmit",
-    "test": "jest",
+    "docker:test:dev": "docker compose exec app npx jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage"
   },
@@ -75,6 +72,7 @@
     "prisma": "^7.5.0",
     "tailwindcss": "^4",
     "ts-jest": "^29.4.10",
+    "ts-node": "^10.9.2",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   }
